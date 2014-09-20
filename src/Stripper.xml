@@ -1,0 +1,62 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+	<Script file="Stripper.lua"/>
+	
+	<Frame name="StripperFrame" frameStrata="BACKGROUND" toplevel="false" parent="UIParent">
+		<Size>
+			<AbsDimension x="200" y="12"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT"/>
+		</Anchors>
+		<Frames>
+			<StatusBar name="Stripper_TimerBar" inherits="TextStatusBar">
+				<Size>
+					<AbsDimension x="190" y="12" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
+					<!--
+						<Offset>
+							<AbsDimension x="5" y="-7" />
+						</Offset>
+					-->
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="LOW">
+						<FontString name="Stripper_TimerBarText" inherits="GameFontNormal" wraponspaces="false">
+							<Anchors>
+								<Anchor point="CENTER">
+								</Anchor>
+							</Anchors>
+							<Color r="1" g="1" b="1"/>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad> <!-- artwork -->
+						Stripper_TimerBar:SetFrameLevel( 0 );
+						Stripper_TimerBar:SetAlpha(1.0);
+						Stripper_TimerBar:Hide();
+					</OnLoad>
+				</Scripts>
+				<BarTexture file="Interface\TargetingFrame\UI-StatusBar"/>
+				<BarColor r="0.5" g="0.5" b="0"/>
+			</StatusBar>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				Stripper.OnLoad();
+			</OnLoad>
+			<OnUpdate>
+				Stripper.OnUpdate()
+			</OnUpdate>
+			<OnEvent>
+				Stripper[event](...);
+			</OnEvent>
+		</Scripts>
+	</Frame>
+	
+</Ui>
+

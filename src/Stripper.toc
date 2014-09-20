@@ -1,0 +1,11 @@
+## Interface: 50400
+## Title: Stripper
+## Notes: Provides for a command to slowly remove gear
+## Author: sistersally of hyjal
+## Version: @VERSION@
+## Description: Slowly removes gear to lower iLvl to play "Gear Golf"
+## SavedVariables:
+## OptionalDeps: Rested
+Stripper.lua
+Stripper.xml
+

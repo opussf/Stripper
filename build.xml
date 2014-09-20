@@ -1,0 +1,85 @@
+<project name="Stripper" default="package">
+
+	<tstamp/>
+	<property file="build.properties"/>
+	<property environment="env"/>
+
+	<property name="build.number" value="${env.BUILD_NUMBER}"/>
+	<property name="version.number" value="${Stripper.version}.${build.number}"/>
+	<property name="project.zip" value="${ant.project.name}_${version.number}.zip"/>
+	<property name="test.dir" location="test"/>
+
+	<property name="target.dir" location="target"/>
+	<property name="working.dir" location="${target.dir}/working"/>
+	<property name="report.dir" location="${target.dir}/reports"/>
+
+	<target name="clean" description="Cleans old builds">
+		<delete dir="target" verbose="true"/>
+	</target>
+
+	<target name="package" depends="test">
+		<property name="package.dir" location="${working.dir}/${ant.project.name}"/>
+		<copy   todir="${package.dir}">
+			<fileset dir="src">
+				<include name="*.lua"/>
+				<include name="*.toc"/>
+				<include name="*.xml"/>
+				<include name="Readme.txt"/>
+			</fileset>
+			<filterset>
+				<filter token="VERSION" value="${version.number}"/>
+			</filterset>
+		</copy>
+		<zip 	destfile="${target.dir}/${project.zip}"
+				basedir="${working.dir}"
+				includes="${ant.project.name}/**"/>
+		<delete dir="${working.dir}" verbose="false"/>
+	</target>
+	
+	<target name="web.deploy" depends="clean" description="deploys the web site">
+		<mkdir	dir="${target.dir}/web"/>
+		<zip	destfile="${target.dir}/${ant.project.name}-web.zip"
+				basedir="site"
+				includes="**"/>
+		<delete dir="${target.dir}/web" verbose="true"/>
+	</target>
+
+	<target name="wow" description="copy files to current wow install">
+		<property name="addon.dir" location="/Applications/World of Warcraft/Interface/AddOns/${ant.project.name}"/>
+		<mkdir dir="${addon.dir}"/>
+		<copy todir="${addon.dir}">
+			<fileset dir="src">
+				<include name="*.lua"/>
+				<include name="*.toc"/>
+				<include name="*.xml"/>
+				<include name="Readme.txt"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="test" description="run unit tests">
+		<mkdir  dir="${report.dir}"/>
+		<exec executable="lua" dir="test" failonerror="true">
+			<arg value="test.lua"/>
+		</exec>
+		<move todir="${report.dir}" file="${test.dir}/testOut.xml"/>
+	</target>
+
+	<target name="deploy" depends="deploy.check" description="deploys the file" if="deploy.run">
+		<copy todir="${deploy.dir}">
+			<fileset dir="${deploy.from}">
+				<include name="*.zip"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="deploy.check">
+		<condition property="deploy.run">
+			<and>
+				<available file="${deploy.from}" type="dir"/>
+				<available file="${deploy.dir}" type="dir"/>
+			</and>
+		</condition>
+	</target>
+
+</project>
