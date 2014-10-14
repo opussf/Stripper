@@ -1,6 +1,6 @@
-## Interface: 50400
+## Interface: @INTERFACE@
 ## Title: Stripper
-## Notes: Provides for a command to slowly remove gear
+## Notes: Provides for a command to slowly remove gear @VERSION@
 ## Author: sistersally of hyjal
 ## Version: @VERSION@
 ## Description: Slowly removes gear to lower iLvl to play "Gear Golf"

@@ -46,6 +46,9 @@
 		<available file="${test.dir}/test.lua" type="file"/>
 	</condition>
 
+	<filter token="VERSION" value="${version.number}"/>
+	<filter token="INTERFACE" value="${INTERFACE}"/>
+
 	<target name="clean" description="Cleans old builds">
 		<delete dir="target" verbose="true"/>
 	</target>
@@ -60,7 +63,7 @@
 
 	<target name="package" depends="changelog, test" description="Create a deploy package">
 		<property name="package.dir" location="${working.dir}/${ant.project.name}"/>
-		<copy	todir="${package.dir}">
+		<copy	todir="${package.dir}" filtering="true">
 			<fileset dir="src">
 				<include name="*.lua"/>
 				<include name="*.toc"/>
@@ -70,9 +73,6 @@
 			<fileset dir="${working.dir}">
 				<include name="*.txt"/>
 			</fileset>
-			<filterset>
-				<filter token="VERSION" value="${version.number}"/>
-			</filterset>
 		</copy>
 		<zip 	destfile="${target.dir}/${project.zip}"
 				basedir="${working.dir}"
@@ -80,7 +80,7 @@
 		<delete dir="${package.dir}" verbose="false"/>
 		<checksum file="${target.dir}/${project.zip}"
 				  property="zip.md5" />
-		<echo message="${zip.md5}" />
+		<echo file="${target.dir}/${project.zip}.md5">${zip.md5} ${project.zip}${line.separator}</echo>
 	</target>
 
 	<target name="web.deploy" description="deploys the web site">
@@ -94,16 +94,13 @@
 	<target name="wow" depends="test" description="copy files to currnet wow install">
 		<property name="addon.dir" location="/Applications/World of Warcraft/Interface/Addons/${ant.project.name}"/>
 		<mkdir dir="${addon.dir}"/>
-		<copy todir="${addon.dir}">
+		<copy todir="${addon.dir}" filtering="true">
 			<fileset dir="src">
 				<include name="*.lua"/>
 				<include name="*.toc"/>
 				<include name="*.xml"/>
 				<include name="Readme.txt"/>
 			</fileset>
-			<filterset>
-				<filter token="VERSION" value="${version.number}"/>
-			</filterset>
 		</copy>
 	</target>
 
@@ -120,16 +117,6 @@
 				</not>
 			</condition>
 		</fail>
-	</target>
-
-	<target name="report" depends="test" description="test reports">
-		<junitreport todir="${report.dir}">
-			<fileset dir="${report.dir}">
-				<include name="testOut.xml"/>
-			</fileset>
-			<report todir="${report.dir}/html"
-					format="noframes"/>
-		</junitreport>
 	</target>
 
 	<target name="deploy" depends="deploy.check" description="deploys the file" if="deploy.run">
