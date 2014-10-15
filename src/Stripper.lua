@@ -181,6 +181,7 @@ function Stripper.RemoveFromSlot( slotName, report )
 	--Stripper.Print("Found a free bag: "..freeBagId);
 	if freeBagId then
 		local slotNum = GetInventorySlotInfo( slotName )
+		--Stripper.Print(slotName..":"..slotNum..":"..(GetInventoryItemLink("player",slotNum) or "nil"))
 		if report then
 			Stripper.Print("Removing "..GetInventoryItemLink("player",slotNum) )
 		end
@@ -236,10 +237,12 @@ function Stripper.AddOne()
 			end
 			local slotName = Stripper.slotListMap[i]
 			if slotName then
-				local equipped = (GetInventoryItemID("player",i) or 0)
-		-- Stripper.Print(Stripper.slotListMap[i] .. ": Equipped: " .. equipped .. " Set: "..Stripper.targetSetItemArray[i])
+				--Stripper.Print("slot: "..i.." equipped:"..(GetInventoryItemID("player",i) or "nil"))
+				--Stripper.Print("Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
+				local equipped = GetInventoryItemID("player",i)  -- nil if not equipped
+
 				if (Stripper.targetSetItemArray[i] ~= 1) and (equipped ~= Stripper.targetSetItemArray[i]) then
-					if (Stripper.targetSetItemArray[i] == 0) then  -- remove item
+					if (not Stripper.targetSetItemArray[i]) then  -- remove item  -- changed from 0 to nil?
 						--Stripper.Print( "Need to remove an item from "..slotName )
 						if Stripper.RemoveFromSlot( slotName, true ) then
 							Stripper.addLater = time()+Stripper.setWaitTime;
@@ -247,7 +250,8 @@ function Stripper.AddOne()
 						else
 							break -- break from the for loop if unable to remove item
 						end
-					else
+					elseif (Stripper.targetSetItemArray[i]) then
+						--Stripper.Print("Looking at "..Stripper.targetSetItemArray[i])
 						local _,itemLink = GetItemInfo(Stripper.targetSetItemArray[i])
 						if (GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
 							Stripper.Print( "Equipping "..(itemLink or "unknown") )
@@ -257,8 +261,11 @@ function Stripper.AddOne()
 							return
 						else
 							Stripper.Print( (itemLink or "unknown").." is not available to equip." )
+							Stripper.targetSetItemArray[i] = nil
 							break -- break from the for loop if item is not inventory
 						end
+					else
+						Stripper.Print("Slot "..i.." is nil?")
 					end
 				end
 				--print(i, Stripper.slotListMap[i], (GetItemInfo(Stripper.targetSetItemArray[i])));
