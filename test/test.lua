@@ -1,5 +1,8 @@
 #!/usr/bin/env lua
 
+addonData = { ["version"] = "1.0",
+}
+
 require "wowTest"
 
 --test.outFileName = "../dest/testOut.xml"
