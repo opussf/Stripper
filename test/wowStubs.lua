@@ -13,9 +13,24 @@ local itemDB = {
 }
 
 -- simulate an internal inventory
-myInventory = { ["9999"] = 52, }
+--myInventory = { ["9999"] = 52, }
+myInventory = {}
+myCurrencies = {}
+-- set one of these to the number of people in the raid or party to reflect being in group or raid.
+-- roster should be an array for GetRaidRosterInfo
+myParty = { ["group"] = nil, ["raid"] = nil, ["roster"] = {} }
+outMail = {}
 globals = {}
 accountExpansionLevel = 4   -- 0 to 5
+
+Items = {
+	["7073"] = {["name"] = "Broken Fang", ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
+	["6742"] = {["name"] = "UnBroken Fang", ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
+	["22261"]= {["name"] = "Love Fool", ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r"},
+	["49927"]= {["name"] = "Love Token", ["link"] = ""},
+	["74661"]= {["name"] = "Black Pepper", ["link"] = "|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r"},
+	["85216"]= {["name"] = "Enigma Seed", ["link"]= "|cffffffff|Hitem:85216:0:0:0:0:0:0:0:90:0:0|h[Enigma Seed]|h|r"},
+}
 
 -- simulate the data structure that is the flight map
 -- Since most the data assumes Alliance, base it on being at Stormwind
@@ -25,21 +40,23 @@ TaxiNodes = {
 	{["name"] = "Ironforge", ["type"] = "NONE", ["hops"] = 1, ["cost"]=1000},
 }
 Currencies = {
-	{["id"] = 402, ["name"] = "Ironpaw Token"},
-	{["id"] = 49927, ["name"] = "Love Token"},
+	["402"] = { ["name"] = "Ironpaw Token", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:402:0:0:0:0:0:0:0:80:0:0|h[Ironpaw Token]|h|r"},
+	["703"] = { ["name"] = "Fictional Currency", ["texturePath"] = "", ["weeklyMax"] = 1000, ["totalMax"] = 4000, isDiscovered = true, ["link"] = "|cffffffff|Hcurrency:703|h[Fictional Currency]|h|r"},
 }
 MerchantInventory = {
-	{["id"] = 7073, ["name"] = "Broken Fang", ["cost"] = 5000, ["quantity"] = 1, ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
-	{["id"] = 6742, ["name"] = "UnBroken Fang", ["cost"] = 10000, ["quantity"] = 1, ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
-	{["id"] = 22261, ["name"] = "Love Fool", ["cost"] = 0, ["quantity"] = 1, ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r",
+	{["id"] = 7073, ["name"] = "Broken Fang", ["cost"] = 5000, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
+	{["id"] = 6742, ["name"] = "UnBroken Fang", ["cost"] = 10000, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
+	{["id"] = 22261, ["name"] = "Love Fool", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r",
 		["currencies"] = {["id"] = 49927, ["quantity"] = 10},},
-	{["id"] = 49927, ["name"] = "Love Token", ["cost"] = 0, ["quantity"] = 1, ["link"] = "",
+	{["id"] = 49927, ["name"] = "Love Token", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "",
 		["currencies"] = {["id"] = 49916, ["quantity"] = 1},},  -- Lovely Charm Bracelet
-	{["id"] = 74661, ["name"] = "Black Pepper", ["cost"] = 0, ["quantity"] = 1, ["link"] = "﻿|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r",
+	{["id"] = 74661, ["name"] = "Black Pepper", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "﻿|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r",
 		["currencies"] = {["id"] = 402, ["quantity"] = 1},},
+	{["id"] = 85216, ["name"] = "Enigma Seed", ["cost"] = 2500, ["quantity"] = 1, ["isUsable"] = nil, ["link"]= "|cffffffff|Hitem:85216:0:0:0:0:0:0:0:90:0:0|h[Enigma Seed]|h|r"},
 }
 TradeSkillItems = {
 	{["id"] = 44157, ["name"] = "Engineering: Turbo-Charged Flying Machine", ["cost"]= 0, ["numReagents"] = 4,
+		["minMade"] = 1, ["maxMade"] = 1,
 		["elink"] = "|cffffffff|Henchant:44157|h[Engineering: Turbo-Charged Flying Machine]|h|r",
 		["ilink"] = "|cff9d9d9d|Hitem:34061:0:0:0:0:0:0:0:80:0:0|h[Turbo-Charged Flying Machine]|h|r",
 		["reagents"] = {{["name"]="Adamantite Frame", ["texture"]="", ["count"]=4, ["id"]=23784},
@@ -59,7 +76,10 @@ strfind = string.find
 strsub = string.sub
 strtolower = string.lower
 time = os.time
+date = os.date
 max = math.max
+random = math.random
+tinsert = table.insert
 
 -- WOW's functions
 function getglobal( globalStr )
@@ -85,6 +105,7 @@ FACTION_BAR_COLORS = {
 -- WOW's constants
 -- http://www.wowwiki.com/BagId
 NUM_BAG_SLOTS=4
+ATTACHMENTS_MAX_SEND=8
 
 -- WOW's frames
 Frame = {
@@ -103,11 +124,15 @@ end
 function CreateFontString(name,...)
 	--print("Creating new FontString: "..name)
 	FontString = {}
+	--	print("1")
 	for k,v in pairs(Frame) do
 		FontString[k] = v
 	end
-	FontString["SetText"] = function(text) end
+	FontString.text = ""
+	FontString["SetText"] = function(self,text) self.text=text; end
+	FontString["GetText"] = function(self) return(self.text); end
 	FontString.name=name
+	--print("FontString made?")
 	return FontString
 end
 
@@ -166,8 +191,8 @@ function GetAccountExpansionLevel()
 	return accountExpansionLevel
 end
 function GetAddOnMetadata(addon, field)
-	local addonData = { ["version"] = "1.0",
-	}
+--	local addonData = { ["version"] = "1.0",
+--	}
 	return addonData[field]
 end
 function GetCoinTextureString( copperIn, fontHeight )
@@ -195,6 +220,19 @@ function GetContainerNumFreeSlots( bagId )
 		return unpack(bagInfo[bagId])
 	else
 		return 0, 0
+	end
+end
+function GetCurrencyInfo( id ) -- id is string
+	-- http://wowprogramming.com/docs/api/GetCurrencyInfo
+	-- returns name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered
+	if Currencies[id] then
+		local c = Currencies[id]
+		return c["name"], (myCurrencies[id] or 0), "", 0, c["weeklyMax"], c["totalMax"], true
+	end
+end
+function GetCurrencyLink( id )
+	if Currencies[id] then
+		return Currencies[id].link
 	end
 end
 function GetItemCount( itemID, includeBank )
@@ -240,10 +278,10 @@ function GetMerchantItemLink( index )
 	end
 end
 function GetMerchantItemInfo( index )
-	--local itemName, texture, price, quantity = GetMerchantItemInfo( i )
+	--local itemName, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo( i )
 	if MerchantInventory[ index ] then
 		local item = MerchantInventory[ index ]
-		return item.name, "", item.cost, item.quantity
+		return item.name, "", item.cost, item.quantity, -1, item.isUsable
 	end
 	--[[
 	local merchantItemInfo = { { "Broken Fang", "", 5000, 1 },  -- 50 silver
@@ -261,6 +299,16 @@ function GetMerchantNumItems()
 	for _ in pairs(MerchantInventory) do count = count + 1 	end
 	return count
 end
+function GetNumGroupMembers()
+	-- http://www.wowwiki.com/API_GetNumGroupMembers
+	-- Returns number of people (include self) in raid or party, 0 if not in raid / party
+	if myParty.raid then
+		return #myParty.roster
+	else
+		return #myParty.roster
+	end
+	return 0
+end
 function GetNumRoutes( nodeId )
 	-- http://wowprogramming.com/docs/api/GetNumRoutes
 	-- returns numHops
@@ -272,8 +320,19 @@ function GetNumTradeSkills( )
 	for _ in pairs( TradeSkillItems ) do count = count + 1 end
 	return count
 end
+function GetRaidRosterInfo( raidIndex )
+	-- http://www.wowwiki.com/API_GetRaidRosterInfo
+	-- returns name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML
+	if (myParty.raid or myParty.party) and myParty.roster then
+		return unpack(myParty.roster[raidIndex]) -- unpack returns the array as seperate values
+	end
+
+end
 function GetRealmName()
 	return "testRealm"
+end
+function GetSendMailItemLink( slot )
+	-- todo:  Write this
 end
 function GetTradeSkillItemLink( index )
 	if TradeSkillItems[index] then
@@ -301,6 +360,10 @@ function GetTradeSkillReagentItemLink( skillIndex, reagentIndex )
 		end
 	end
 end
+function GetTradeSkillNumMade( index )
+	-- returns minMade, maxMade of the target item
+	return TradeSkillItems[index].minMade, TradeSkillItems[index].maxMade
+end
 function GetTradeSkillNumReagents( index )
 	return TradeSkillItems[index].numReagents
 end
@@ -308,6 +371,18 @@ function GetTradeSkillRecipeLink( index )
 	return TradeSkillItems[index].elink
 end
 function InterfaceOptionsFrame_OpenToCategory()
+end
+function IsInGuild()
+	-- http://www.wowwiki.com/API_IsInGuild
+	-- 1, nil boolean return of being in guild
+	return 1
+end
+function IsInRaid()
+	-- http://www.wowwiki.com/API_IsInRaid
+	-- 1, nill boolean return of being in raid
+	-- myParty = { ["group"] = nil, ["raid"] = nil } -- set one of these to true to reflect being in group or raid.
+
+	return ( myParty["raid"] and 1 or nil )
 end
 function NumTaxiNodes()
 	-- http://www.wowwiki.com/API_NumTaxiNodes
@@ -318,6 +393,14 @@ function NumTaxiNodes()
 	return count
 end
 function PlaySoundFile( file ) end
+function SecondsToTime( seconds )
+	-- formats seconds to a readable time
+	return ""
+end
+function SendChatMessage( msg, chatType, language, channel )
+	-- http://www.wowwiki.com/API_SendChatMessage
+	-- returns nil
+end
 function TaxiNodeCost( nodeId )
 	-- http://www.wowwiki.com/API_TaxiNodeCost
 	return TaxiNodes[nodeId].cost
