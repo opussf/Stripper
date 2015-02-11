@@ -230,9 +230,11 @@ function Stripper.AddOne()
 		local i = 0
 		for _,v in pairs(Stripper.slotListAdd) do -- Loop through the slot list
 			for ii=1, 19 do                    -- find the index number
-				if v == Stripper.slotListMap[ii] then
+				if (v == Stripper.slotListMap[ii]) and (Stripper.targetSetItemArray[ii] and Stripper.targetSetItemArray[ii] >= 0) then
 					i = ii
 					break
+				else
+					-- Tell that something is missing?
 				end
 			end
 			local slotName = Stripper.slotListMap[i]
@@ -243,7 +245,7 @@ function Stripper.AddOne()
 
 				if (Stripper.targetSetItemArray[i] ~= 1) and (equipped ~= Stripper.targetSetItemArray[i]) then
 					if (not Stripper.targetSetItemArray[i]) then  -- remove item  -- changed from 0 to nil?
-						--Stripper.Print( "Need to remove an item from "..slotName )
+						-- Stripper.Print( "Need to remove an item from "..slotName )
 						if Stripper.RemoveFromSlot( slotName, true ) then
 							Stripper.addLater = time()+Stripper.setWaitTime;
 							return
@@ -254,18 +256,16 @@ function Stripper.AddOne()
 						--Stripper.Print("Looking at "..Stripper.targetSetItemArray[i])
 						local _,itemLink = GetItemInfo(Stripper.targetSetItemArray[i])
 						if (GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
-							Stripper.Print( "Equipping "..(itemLink or "unknown") )
+							Stripper.Print( "Equipping "..(itemLink or "unknown").." to "..slotName )
 							EquipItemByName( Stripper.targetSetItemArray[i], i )
 							Stripper.addLater = time()+Stripper.setWaitTime;
 							--Stripper.Print( "Setting future add to "..Stripper.addLater..". Now: "..time())
 							return
 						else
-							Stripper.Print( (itemLink or "unknown").." is not available to equip." )
+							Stripper.Print( (itemLink or "unknown").." is not available to equip to "..slotName )
 							Stripper.targetSetItemArray[i] = nil
 							break -- break from the for loop if item is not inventory
 						end
-					else
-						Stripper.Print("Slot "..i.." is nil?")
 					end
 				end
 				--print(i, Stripper.slotListMap[i], (GetItemInfo(Stripper.targetSetItemArray[i])));
