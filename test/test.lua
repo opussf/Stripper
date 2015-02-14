@@ -51,5 +51,8 @@ function test.test_getFreeBag_HasFreeSpace_OnlyBackpack_Empty()
 	local bagid = Stripper.getFreeBag()
 	assertEquals( 0, bagid )
 end
-
+function test.test_Command_Help()
+	-- Send the help command
+	Stripper.Command("help")
+end
 test.run()
