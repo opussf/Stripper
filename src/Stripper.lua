@@ -85,6 +85,7 @@ function Stripper.Command( msg )
 	if cmdFunc then
 		cmdFunc.func(param);
 	else
+		-- Stripper.slotItemIsMissing = {}
 		local setName = isEquipmentSet(cmd);
 		if setName then
 			Stripper.setWaitTime = tonumber(param) or 5
@@ -233,8 +234,6 @@ function Stripper.AddOne()
 				if (v == Stripper.slotListMap[ii]) and (Stripper.targetSetItemArray[ii] and Stripper.targetSetItemArray[ii] >= 0) then
 					i = ii
 					break
-				else
-					-- Tell that something is missing?
 				end
 			end
 			local slotName = Stripper.slotListMap[i]
@@ -256,7 +255,7 @@ function Stripper.AddOne()
 						--Stripper.Print("Looking at "..Stripper.targetSetItemArray[i])
 						local _,itemLink = GetItemInfo(Stripper.targetSetItemArray[i])
 						if (GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
-							Stripper.Print( "Equipping "..(itemLink or "unknown").." to "..slotName )
+							Stripper.Print( "Equipping "..(itemLink or "unknown") )
 							EquipItemByName( Stripper.targetSetItemArray[i], i )
 							Stripper.addLater = time()+Stripper.setWaitTime;
 							--Stripper.Print( "Setting future add to "..Stripper.addLater..". Now: "..time())
