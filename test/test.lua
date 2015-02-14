@@ -21,12 +21,16 @@ function test.after()
 end
 function test.testOnLoad()
 	-- This may seem noop, but it tests that the OnLoad throws no errors
+	assertTrue( SlashCmdList["STRIPPER"] )
 end
 function test.testPlayerIsBusy_EntersCombat()
+	-- Assure that isBusy is set correctly
 	Stripper.PLAYER_REGEN_DISABLED()
 	assertTrue( Stripper.isBusy )
+	Stripper.PLAYER_REGEN_ENABLED()
 end
 function test.testPlayerIsBusy_LeavesCombat()
+	-- Assure that isBusy is cleared correctly
 	Stripper.PLAYER_REGEN_DISABLED()
 	Stripper.PLAYER_REGEN_ENABLED()
 	assertIsNil( Stripper.isBusy )
@@ -42,8 +46,10 @@ function test.testPlayerIsBusy_EndsFishing()
 	Stripper.COMBAT_TEXT_UPDATE( "SPELL_AURA_REMOVED", "Fishing" ) -- start fishing event
 	assertFalse( Stripper.isBusy )
 end
-function test.test_getFreeBag_HasFreeSpace_OnlyBackpack()
+function test.test_getFreeBag_HasFreeSpace_OnlyBackpack_Empty()
+	-- Test that it finds a bag that has free space.
 	local bagid = Stripper.getFreeBag()
+	assertEquals( 0, bagid )
 end
 
 test.run()
