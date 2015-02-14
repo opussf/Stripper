@@ -1,5 +1,5 @@
 -----------------------------------------
--- Author  :  $Author:$
+-- Author  :  Opussf
 -- Date    :  $Date:$
 -- Revision:  $Revision:$
 -----------------------------------------
@@ -19,7 +19,11 @@ myCurrencies = {}
 -- set one of these to the number of people in the raid or party to reflect being in group or raid.
 -- roster should be an array for GetRaidRosterInfo
 myParty = { ["group"] = nil, ["raid"] = nil, ["roster"] = {} }
+myGuild = { ["name"] = "Test Guild", }
+-- set myGuild = {} to simulate not in a guild
 outMail = {}
+inbox = {}
+onCursor = {}
 globals = {}
 accountExpansionLevel = 4   -- 0 to 5
 
@@ -47,11 +51,11 @@ MerchantInventory = {
 	{["id"] = 7073, ["name"] = "Broken Fang", ["cost"] = 5000, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
 	{["id"] = 6742, ["name"] = "UnBroken Fang", ["cost"] = 10000, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
 	{["id"] = 22261, ["name"] = "Love Fool", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r",
-		["currencies"] = {["id"] = 49927, ["quantity"] = 10},},
+		["currencies"] = {{["id"] = 49927, ["quantity"] = 10},}},
 	{["id"] = 49927, ["name"] = "Love Token", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "",
-		["currencies"] = {["id"] = 49916, ["quantity"] = 1},},  -- Lovely Charm Bracelet
+		["currencies"] = {{["id"] = 49916, ["quantity"] = 1},}},  -- Lovely Charm Bracelet
 	{["id"] = 74661, ["name"] = "Black Pepper", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "﻿|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r",
-		["currencies"] = {["id"] = 402, ["quantity"] = 1},},
+		["currencies"] = {{["id"] = 402, ["quantity"] = 1},}},
 	{["id"] = 85216, ["name"] = "Enigma Seed", ["cost"] = 2500, ["quantity"] = 1, ["isUsable"] = nil, ["link"]= "|cffffffff|Hitem:85216:0:0:0:0:0:0:0:90:0:0|h[Enigma Seed]|h|r"},
 }
 TradeSkillItems = {
@@ -143,6 +147,8 @@ function CreateStatusBar(name,...)
 	end
 	StatusBar.name=name
 
+	StatusBar["SetMinMaxValues"] = function() end;
+
 	return StatusBar
 end
 
@@ -170,29 +176,58 @@ DEFAULT_CHAT_FRAME={ ["AddMessage"] = print, }
 UIErrorsFrame={ ["AddMessage"] = print, }
 
 -- stub some external API functions (try to keep alphabetical)
-function CombatTextSetActiveUnit( who ) end
 function BuyMerchantItem( index, quantity )
 	-- adds quantity of index to myInventory
 	-- no return value
-	local itemID = INEED.getItemIdFromLink( GetMerchantItemLink( index ) )
+	local itemID = MerchantInventory[index].id
 	if myInventory[itemID] then
 		myInventory[itemID] = myInventory[itemID] + quantity
 	else
 		myInventory[itemID] = quantity
 	end
-	INEED.UNIT_INVENTORY_CHANGED()
-
-	-- meh
+	--INEED.UNIT_INVENTORY_CHANGED()
 end
-function DoEmote( emote ) end
+function CheckInbox()
+	-- http://www.wowwiki.com/API_CheckInbox
+	-- Fires the MAIL_INBOX_UPDATE event when data is available
+	-- @TODO - Write this
+end
+function ClearCursor()
+	-- @TODO - Write this
+end
+--[[
+function ClearSendMail()
+	-- http://www.wowwiki.com/API_ClearSendMail
+	-- clears any text, items or money from the mail message to be sent
+	-- @TODO - Write this
+end
+function ClickSendMailItemButton( slot, clearItem )
+	-- http://www.wowwiki.com/API_ClickSendMailItemButton
+	--
+	-- @TODO - Write this
+end
+function CloseMail()
+	-- http://www.wowwiki.com/API_CloseMail
+	-- Fires the MAIL_CLOSED event
+	-- returns: nil
+	-- @TODO - Write this
+end
+]]
+function CombatTextSetActiveUnit( who )
+	-- http://www.wowwiki.com/API_CombatTextSetActiveUnit
+	-- @TODO - Write this
+end
+function DoEmote( emote )
+	-- not tested as the only side effect is the character doing an emote
+end
 function GetAccountExpansionLevel()
 	-- http://www.wowwiki.com/API_GetAccountExpansionLevel
 	-- returns 0 to 4 (5)
 	return accountExpansionLevel
 end
 function GetAddOnMetadata(addon, field)
---	local addonData = { ["version"] = "1.0",
---	}
+	-- returns addonData[field] for 'addon'
+	-- local addonData = { ["version"] = "1.0", }
 	return addonData[field]
 end
 function GetCoinTextureString( copperIn, fontHeight )
@@ -203,9 +238,9 @@ function GetCoinTextureString( copperIn, fontHeight )
 		local gold = math.floor(copperIn / 10000); copperIn = copperIn - (gold * 10000)
 		local silver = math.floor(copperIn / 100); copperIn = copperIn - (silver * 100)
 		local copper = copperIn
-		return( (gold and gold.."G")..
-				(silver and ((gold and " " or "")..silver.."S"))..
-				(copper and ((silver and " " or "")..copper.."C")) )
+		return( (gold and gold.."G ")..
+				(silver and silver.."S ")..
+				(copper and copper.."C"))
 	end
 end
 function GetContainerNumFreeSlots( bagId )
@@ -241,11 +276,9 @@ function GetItemCount( itemID, includeBank )
 end
 function GetItemInfo( itemID )
 	-- returns name, itemLink
-	local itemData = {
-			["7073"] = { "Broken Fang", "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r" },
-			["6742"] = { "UnBroken Fang", "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r" },
-	}
-	if itemData[itemID] then return unpack( itemData[itemID] ) end
+	if Items[itemID] then
+		return Items[itemID].name, Items[itemID].link
+	end
 end
 function GetMerchantItemCostInfo( index )
 	-- returns count of alterate items needed to purchase an item
@@ -283,12 +316,6 @@ function GetMerchantItemInfo( index )
 		local item = MerchantInventory[ index ]
 		return item.name, "", item.cost, item.quantity, -1, item.isUsable
 	end
-	--[[
-	local merchantItemInfo = { { "Broken Fang", "", 5000, 1 },  -- 50 silver
-			{ "UnBroken Fang", "", 10000, 1 },            -- 1 gold
-	}
-	return unpack( merchantItemInfo[index] )
-	]]
 end
 function GetMerchantItemMaxStack( index )
 	-- Max allowable amount per purchase.  Hard code to 20 for now
@@ -326,13 +353,23 @@ function GetRaidRosterInfo( raidIndex )
 	if (myParty.raid or myParty.party) and myParty.roster then
 		return unpack(myParty.roster[raidIndex]) -- unpack returns the array as seperate values
 	end
-
 end
 function GetRealmName()
 	return "testRealm"
 end
+function GetSendMailItem( slot )
+	-- 1 <= slot <= ATTACHMENTS_MAX_SEND
+	-- returns: itemName, itemTexture, stackCount, quality
+end
 function GetSendMailItemLink( slot )
-	-- todo:  Write this
+	-- 1 <= slot <= ATTACHMENTS_MAX_SEND
+	-- returns: itemlink
+end
+function GetSendMailMoney()
+	-- returns: amount (in copper)
+end
+function GetSendMailPrice()
+	-- returns: amount (in copper) to send the mail
 end
 function GetTradeSkillItemLink( index )
 	if TradeSkillItems[index] then
@@ -354,6 +391,7 @@ function GetTradeSkillReagentItemLink( skillIndex, reagentIndex )
 	-- link = GetTradeSkillReagentItemLink(skillId, reagentId)
 	-- skillId = TradeSkillIndex
 	-- reagentId = ReagentIndex
+	-- returns LINK or NIL (?)
 	if TradeSkillItems[skillIndex] then
 		if TradeSkillItems[skillIndex].reagents[reagentIndex] then
 			return TradeSkillItems[skillIndex].reagents[reagentIndex].link
@@ -370,20 +408,25 @@ end
 function GetTradeSkillRecipeLink( index )
 	return TradeSkillItems[index].elink
 end
+--[[
+function HasNewMail()
+	return true
+end
 function InterfaceOptionsFrame_OpenToCategory()
 end
+]]
 function IsInGuild()
 	-- http://www.wowwiki.com/API_IsInGuild
 	-- 1, nil boolean return of being in guild
-	return 1
+	return (myGuild and myGuild.name) and 1 or nil
 end
 function IsInRaid()
 	-- http://www.wowwiki.com/API_IsInRaid
 	-- 1, nill boolean return of being in raid
 	-- myParty = { ["group"] = nil, ["raid"] = nil } -- set one of these to true to reflect being in group or raid.
-
 	return ( myParty["raid"] and 1 or nil )
 end
+
 function NumTaxiNodes()
 	-- http://www.wowwiki.com/API_NumTaxiNodes
 	local count = 0
@@ -392,14 +435,57 @@ function NumTaxiNodes()
 	end
 	return count
 end
-function PlaySoundFile( file ) end
-function SecondsToTime( seconds )
-	-- formats seconds to a readable time
-	return ""
+function PickupItem( itemID )
+	-- TODO: WriteThis
+end
+function PlaySoundFile( file )
+	-- does nothing except play a sound.  Do not test.
+end
+function SecondsToTime( secondsIn, noSeconds, notAbbreviated, maxCount )
+	-- http://www.wowwiki.com/API_SecondsToTime
+	-- formats seconds to a readable time  -- WoW omits seconds if 0 even if noSeconds is false
+	-- secondsIn: number of seconds to work with
+	-- noSeconds: True to ommit seconds display (optional - default: false)
+	-- notAbbreviated: True to use full unit text, short text otherwise (optional - default: false)
+	-- maxCount: Maximum number of terms to return (optional - default: 2)
+	maxCount = maxCount or 2
+	local days, hours, minutes, seconds = 0
+	local outArray = {}
+	days = math.floor( secondsIn / 86400 )
+	secondsIn = secondsIn - (days * 86400)
+
+	hours = math.floor( secondsIn / 3600 )
+	secondsIn = secondsIn - (hours * 3600)
+
+	minutes = math.floor( secondsIn / 60 )
+	seconds = secondsIn - (minutes * 60)
+
+	-- format output
+	local includeZero = false
+	formats = { { "%i Day", "%i Day", days},
+			{ "%i Hr", "%i Hours", hours},
+			{ "%i Min", "%i Minutes", minutes},
+			{ "%i Sec", "%i Seconds", seconds},
+		}
+	if noSeconds or seconds == 0 then  -- remove the seconds format if no seconds
+		table.remove(formats, 4)
+	end
+
+	for i = 1,#formats do
+		if (#outArray < maxCount) and (((formats[i][3] > 0) or includeZero)) then
+			table.insert( outArray,
+					string.format( formats[i][(notAbbreviated and 2 or 1)], formats[i][3] )
+			)
+			includeZero = true  -- include subsequent 0 values
+		end
+	end
+	return( table.concat( outArray, " " ) )
 end
 function SendChatMessage( msg, chatType, language, channel )
 	-- http://www.wowwiki.com/API_SendChatMessage
+	-- This could simulate sending text to the channel, in the language, and raise the correct event.
 	-- returns nil
+	-- @TODO: Expand this
 end
 function TaxiNodeCost( nodeId )
 	-- http://www.wowwiki.com/API_TaxiNodeCost
