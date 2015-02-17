@@ -27,6 +27,11 @@ onCursor = {}
 globals = {}
 accountExpansionLevel = 4   -- 0 to 5
 
+SlotListMap={ "HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","WaistSlot","LegsSlot",
+		"FeetSlot", "WristSlot", "HandsSlot", "Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot",
+		"BackSlot","MainHandSlot","SecondaryHandSlot","RangedSlot","TabardSlot", "Bag0Slot", "Bag1Slot",
+		"Bag2Slot", "Bag3Slot",
+}
 Items = {
 	["7073"] = {["name"] = "Broken Fang", ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
 	["6742"] = {["name"] = "UnBroken Fang", ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
@@ -72,6 +77,10 @@ TradeSkillItems = {
 					["link"] = "|cffffff|Hitem:34249|h[Hula Girl Doll]|h|r"},
 		},
 	},
+}
+-- EquipmentSets is an array (1 based numeric key table)
+EquipmentSets = {
+	{["name"] = "testSet", ["icon"] = "icon", ["items"] = {},},
 }
 
 -- WOW's function renames
@@ -270,6 +279,28 @@ function GetCurrencyLink( id )
 		return Currencies[id].link
 	end
 end
+function GetEquipmentSetInfo( index )
+	-- http://www.wowwiki.com/API_GetEquipmentSetInfo
+	-- Returns: name, icon, lessIndex = GetEquipmentSetInfo(index)
+	-- Returns: nill if no equipmentSet at that index
+	-- lessIndex is index-1 ( not used )
+	if EquipmentSets[index] then
+		return EquipmentSets[index].name, EquipmentSets[index].icon, index-1
+	end
+end
+function GetEquipmentSetInfoByName( nameIn )
+	-- http://www.wowwiki.com/API_GetEquipmentSetInfo
+	-- Returns: icon, lessIndex = GetEquipmentSetInfoByName
+	for i = 1, #EquipmentSets do
+		if EquipmentSets[i].name == nameIn then  -- Since EquipementSet names are case sensitve...
+			return EquipmentSets[i].icon, i-1
+		end
+	end
+end
+function GetInventorySlotInfo( slotName )
+	-- http://www.wowwiki.com/API_GetInventorySlotInfo
+	-- Returns: slotID, textureName
+end
 function GetItemCount( itemID, includeBank )
 	-- print( itemID, myInventory[itemID] )
 	return myInventory[itemID] or 0
@@ -325,6 +356,11 @@ function GetMerchantNumItems()
 	local count = 0
 	for _ in pairs(MerchantInventory) do count = count + 1 	end
 	return count
+end
+function GetNumEquipmentSets()
+	-- http://www.wowwiki.com/API_GetNumEquipmentSets
+	-- Returns 0,MAX_NUM_EQUIPMENT_SETS
+	return #EquipmentSets
 end
 function GetNumGroupMembers()
 	-- http://www.wowwiki.com/API_GetNumGroupMembers
@@ -443,7 +479,7 @@ function PlaySoundFile( file )
 end
 function SecondsToTime( secondsIn, noSeconds, notAbbreviated, maxCount )
 	-- http://www.wowwiki.com/API_SecondsToTime
-	-- formats seconds to a readable time  -- WoW omits seconds if 0 even if noSeconds is false
+	-- formats seconds to a readable time
 	-- secondsIn: number of seconds to work with
 	-- noSeconds: True to ommit seconds display (optional - default: false)
 	-- notAbbreviated: True to use full unit text, short text otherwise (optional - default: false)
@@ -467,7 +503,7 @@ function SecondsToTime( secondsIn, noSeconds, notAbbreviated, maxCount )
 			{ "%i Min", "%i Minutes", minutes},
 			{ "%i Sec", "%i Seconds", seconds},
 		}
-	if noSeconds or seconds == 0 then  -- remove the seconds format if no seconds
+	if noSeconds then  -- remove the seconds format if no seconds
 		table.remove(formats, 4)
 	end
 
