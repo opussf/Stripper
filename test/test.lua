@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
-addonData = { ["version"] = "1.0",
+addonData = { ["Version"] = "1.0",
 }
 
 require "wowTest"
