@@ -67,37 +67,6 @@ function isEquipmentSet( testStr )
 	return nil;
 end
 
--- Command code
-Stripper.commandList = {
-	["remove"] = {
-		["func"] = function() Stripper.RemoveOne(); end,
-		["help"] = "Remove a piece of gear. No command given does the same.",
-	},
-	["test"] = {
-		["func"] = function() Stripper.Test(); end,
-		["help"] = "Test",
-	},
-}
-function Stripper.Command( msg )
-	local cmd, param = Stripper.ParseCmd(msg);
-	cmd = string.lower(cmd);
-	local cmdFunc = Stripper.commandList[cmd];
-	if cmdFunc then
-		cmdFunc.func(param);
-	else
-		local setName = isEquipmentSet(cmd);
-		if setName then
-			Stripper.setWaitTime = tonumber(param) or 5
-			Stripper.targetSet = setName
-			Stripper.Print("Set targetSet to "..Stripper.targetSet);
-			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet);
-			Stripper.AddOne();
-		else
-			Stripper.commandList.remove.func();
-		end
-	end
-end
-
 -- Event Handlers
 function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("ADDON_LOADED");
@@ -144,7 +113,6 @@ function Stripper.OnUpdate()
 		Stripper.updateBar()
 	end
 end
-
 function Stripper.updateBar()
 	Stripper_TimerBar:Show()
 	Stripper_TimerBar:SetMinMaxValues( 0, Stripper.setWaitTime )
@@ -153,6 +121,7 @@ function Stripper.updateBar()
 end
 function Stripper.getFreeBag()
 	-- http://www.wowwiki.com/BagId
+	-- bags are 0 based, right to left.  0 = backpack
 	local freeid, typeid
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
 		freeid, typeid = GetContainerNumFreeSlots(bagid)
@@ -166,7 +135,7 @@ function Stripper.getItemToRemove()
 	-- Finds the first item in the list of slots
 	-- Returns: slotNum, slotName
 	for _,v in pairs(Stripper.slotListRemove) do
-		local slotNum = GetInventorySlotInfo(v);
+		local slotNum = GetInventorySlotInfo(v)
 		local itemId = GetInventoryItemID("player", slotNum);
 		if itemId then
 			--Stripper.Print(v..":"..itemId);
@@ -175,6 +144,7 @@ function Stripper.getItemToRemove()
 	end
 	return nil;
 end
+--[[
 function Stripper.RemoveFromSlot( slotName, report )
 	ClearCursor()
 	local freeBagId = Stripper.getFreeBag()
@@ -200,6 +170,7 @@ function Stripper.RemoveFromSlot( slotName, report )
 	return nil
 
 end
+]]
 function Stripper.RemoveOne()
 	if Stripper.isBusy then
 		Stripper.removeLater = true;
@@ -215,6 +186,7 @@ function Stripper.RemoveOne()
 		Rested.commandList.ilvl();
 	end
 end
+--[[
 function Stripper.AddOne()
 	-- Loop through the targetSetItemArray
 	-- Compare the item to the one in the slot.
@@ -279,7 +251,8 @@ function Stripper.AddOne()
 		Stripper_TimerBar:Hide()
 	end
 end
-
+]]
+--[[  -- Un-needed code
 function Stripper.Test()
 	if Stripper.targetSet then
 		Stripper.Print("A targetSet is set:"..Stripper.targetSet);
@@ -292,5 +265,50 @@ function Stripper.Test()
 		end
 
 
+	end
+end
+]]
+
+-- Command code
+function Stripper.PrintHelp()
+	Stripper.Print(STRIPPER_MSG_ADDONNAME.." version: "..STRIPPER_MSG_VERSION)
+	Stripper.Print("Use: /stripper, /st, or /mm for these commands:")
+
+
+	for cmd, info in pairs(Stripper.commandList) do
+		Stripper.Print(string.format("-- %s %s -> %s",
+			cmd, info.help[1], info.help[2]));
+	end
+end
+Stripper.commandList = {
+	["help"] = {
+		["func"] = Stripper.PrintHelp,
+		["help"] = {"", "Print this help"},
+	},
+	["remove"] = {
+		["func"] = Stripper.RemoveOne,
+		["help"] = {"", "Remove a piece of gear. Default action."},
+	},
+	["<EquipmentSet>"] = {
+		["help"] = {"<delay seconds>", "Change to <EquipmentSet>, one piece every <delay seconds>"}
+	},
+}
+function Stripper.Command( msg )
+	local cmd, param = Stripper.ParseCmd(msg);
+	cmd = string.lower(cmd);
+	local cmdFunc = Stripper.commandList[cmd];
+	if cmdFunc then
+		cmdFunc.func(param);
+	else
+		local setName = isEquipmentSet(cmd);
+		if setName then
+			Stripper.setWaitTime = tonumber(param) or 5
+			Stripper.targetSet = setName
+			Stripper.Print("Set targetSet to "..Stripper.targetSet);
+			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet);
+			Stripper.AddOne();
+		else
+			Stripper.commandList.remove.func()
+		end
 	end
 end

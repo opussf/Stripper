@@ -55,4 +55,10 @@ function test.test_Command_Help()
 	-- Send the help command
 	Stripper.Command("help")
 end
+function test.test_Command_RemoveOne()
+	Stripper.Command("remove")
+end
+function test.test_Command_Default()
+	Stripper.Command("")
+end
 test.run()
