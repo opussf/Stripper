@@ -146,6 +146,9 @@ function Stripper.getItemToRemove()
 end
 --[[
 function Stripper.RemoveFromSlot( slotName, report )
+	-- Remove an item from slotName with optional reporting
+	-- String: slotName to remove an item from
+	-- Boolean: report - to report or not.
 	ClearCursor()
 	local freeBagId = Stripper.getFreeBag()
 	--Stripper.Print("Found a free bag: "..freeBagId);

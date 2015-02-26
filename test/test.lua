@@ -76,8 +76,12 @@ function test.test_GetItemToRemove_HeadEquipped_Name()
 	local result = select(2, Stripper.getItemToRemove())
 	assertEquals( "HeadSlot", result )
 end
-function test.test_RemoveOne()
+function test.test_Command_noGear()
 	Stripper.Command("")
-
 end
+function test.test_Command_withGear()
+	myGear[1] = "113596" -- http://us.battle.net/wow/en/item/113596/raid-heroic  -- http://www.wowhead.com/item=113596/vilebreath-mask&bonus=0
+	Stripper.Command("")
+end
+function test.test_RemoveFromSlot()
 test.run()
