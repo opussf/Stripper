@@ -84,4 +84,5 @@ function test.test_Command_withGear()
 	Stripper.Command("")
 end
 function test.test_RemoveFromSlot()
+end
 test.run()

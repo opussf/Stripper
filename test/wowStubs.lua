@@ -229,6 +229,13 @@ function CombatTextSetActiveUnit( who )
 	-- http://www.wowwiki.com/API_CombatTextSetActiveUnit
 	-- @TODO - Write this
 end
+function CursorHasItem()
+	-- http://www.wowwiki.com/API_CursorHasItem
+	-- Returns: 1-nil  if cursor has an item
+	if onCursor["item"] then
+		return true
+	end
+end
 function DoEmote( emote )
 	-- not tested as the only side effect is the character doing an emote
 end
@@ -307,6 +314,19 @@ function GetInventoryItemID( unitID, invSlot )
 	-- Returns: itemID of the item in that slot, or nil
 	if unitID == "player" then
 		return myGear[invSlot]
+	end
+end
+function GetInventoryItemLink( unitID, slotID )
+	-- http://www.wowwiki.com/API_GetInventoryItemLink
+	-- unitID: string
+	-- slotID: number
+	-- Returns: itemLink or nil
+	if unitID == "player" then
+		if myGear[slotID] then -- has an item in the slot
+			if Items[myGear[slotID]] then -- knows about the item ID
+				return Items[myGear[slotID]].link
+			end
+		end
 	end
 end
 function GetInventorySlotInfo( slotName )
@@ -489,7 +509,7 @@ function NumTaxiNodes()
 	end
 	return count
 end
-function PickupItem( itemString )
+function PickupItem( itemIn )
 	-- http://www.wowwiki.com/API_PickupItem
 	-- itemString is:
 	--   ItemID (Numeric value)
@@ -498,13 +518,30 @@ function PickupItem( itemString )
 	--   ItemLink (Full link text as if Shift-Clicking Item)
 	-- Not sure what this should do if there is already something on the cursor
 	onCursor={}
-	onCursor['item'] = itemString
+	onCursor['item'] = itemIn
 	onCursor['quantity'] = 1
-	-- TODO: WriteThis
+end
+function PickupInventoryItem( slotID )
+	-- http://www.wowwiki.com/API_PickupInventoryItem
+	if myGear[slotID] then
+		PickupItem( myGear[slotID] )
+	end
 end
 function PlaySoundFile( file )
 	-- does nothing except play a sound.  Do not test.
 end
+function PutItemInBackpack()
+	-- http://www.wowwiki.com/API_PutItemInBackpack
+	-- no argument, no return
+	-- This puts the item in the Backpack, or next free bag, and clears the cursor
+	onCursor = {}
+end
+--[[
+function PutItemInBag( bagNum )
+	-- http://www.wowwiki.com/API_PutItemInBag
+	-- bagNum, numberic (20 right most - 23 left most)
+end
+]]
 function SecondsToTime( secondsIn, noSeconds, notAbbreviated, maxCount )
 	-- http://www.wowwiki.com/API_SecondsToTime
 	-- formats seconds to a readable time
