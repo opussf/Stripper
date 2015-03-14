@@ -15,6 +15,9 @@ local itemDB = {
 -- simulate an internal inventory
 --myInventory = { ["9999"] = 52, }
 myInventory = {}
+bagInfo = {
+	[0] = {16, 0},
+}
 myCurrencies = {}
 -- set one of these to the number of people in the raid or party to reflect being in group or raid.
 -- roster should be an array for GetRaidRosterInfo
@@ -270,9 +273,8 @@ function GetContainerNumFreeSlots( bagId )
 	-- http://www.wowwiki.com/BagType
 	-- returns numberOfFreeSlots, BagType
 	-- BagType should be 0
-	bagInfo = {
-		[0] = {16, 0},
-	}
+	-- TODO: For API, what should it return if no bag is equipped?
+	-- ^^ Note, the backpack(0) is ALWAYS equipped.
 	if bagInfo[bagId] then
 		return unpack(bagInfo[bagId])
 	else
@@ -560,6 +562,7 @@ function PutItemInBackpack()
 	-- http://www.wowwiki.com/API_PutItemInBackpack
 	-- no argument, no return
 	-- This puts the item in the Backpack and clears the cursor
+	-- Really, it does not really put it in any bag, just clears the cursor, or removes it from inventory
 	-- Removes item from source
 	if onCursor["item"] then -- Cursor has an item
 		myInventory[onCursor['item']] = onCursor['quantity']
@@ -569,12 +572,18 @@ function PutItemInBackpack()
 	end
 	onCursor = {}
 end
---[[
 function PutItemInBag( bagNum )
 	-- http://www.wowwiki.com/API_PutItemInBag
 	-- bagNum, numberic (20 right most - 23 left most)
+	-- Really, it does not really put it in any bag, just clears the cursor, or removes it from inventory
+	if onCursor["item"] then
+		myInventory[onCursor['item']] = onCursor['quantity']
+		if (onCursor["from"] == "myGear" and onCursor['fromSlot']) then
+			myGear[onCursor['fromSlot']] = nil -- Remove it from Gear
+		end
+	end
+	onCursor = {}
 end
-]]
 function SecondsToTime( secondsIn, noSeconds, notAbbreviated, maxCount )
 	-- http://www.wowwiki.com/API_SecondsToTime
 	-- formats seconds to a readable time
