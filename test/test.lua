@@ -16,6 +16,9 @@ require "Stripper"
 
 function test.before()
 	Stripper.OnLoad()
+	bagInfo = {
+		[0] = {16, 0},
+	}
 end
 function test.after()
 	myGear = {}
@@ -49,9 +52,20 @@ function test.testPlayerIsBusy_EndsFishing()
 end
 function test.testGetFreeBag_HasFreeSpace_OnlyBackpack_Empty()
 	-- Test that it finds a bag that has free space.
-	local bagid = Stripper.getFreeBag()
-	assertEquals( 0, bagid )
+	local bagId = Stripper.getFreeBag()
+	assertEquals( 0, bagId )
 end
+function test.testGetFreeBag_HasFreeSpace_Bag1_HasSpace()
+	bagInfo = {
+		[0] = {0,0},
+		[1] = {8,0},
+	}
+	local bagId = Stripper.getFreeBag()
+	assertEquals( 1, bagId )
+end
+function test.testGetFreeBag_HasNoSpace()
+end
+
 function test.testCommand_Help()
 	-- Send the help command  -- no side effects to check on
 	Stripper.Command("help")
@@ -60,17 +74,39 @@ function test.testCommand_RemoveOne()
 	Stripper.Command("remove")
 end
 function test.testCommand_Default()
+	-- This tests command works.
 	Stripper.Command("")
 end
 function test.testCommand_noGear()
+	-- This is to test that trying to remove an item with nothing equipped does not fail.
 	Stripper.Command("")
 	-- no assert, should do nothing, with no failure.
 end
-function test.testCommand_withGear()
+function test.testCommand_withGear_toBackpack()
+	-- Default is only backpack equipped with 16 free slots.
 	myGear[1] = "113596" -- http://us.battle.net/wow/en/item/113596/raid-heroic  -- http://www.wowhead.com/item=113596/vilebreath-mask&bonus=0
 	Stripper.Command("")
-	assertIsNil( myGear[1] ) -- The item should be removed.
+	assertIsNil( myGear[1], "HeadSlot should be empty now." ) -- The item should be removed.
 end
+function test.testCommand_withGear_toBag1()
+	-- Strip an equipped item to not the backpack
+	bagInfo = {
+		[0] = {0,0}, -- backpack is full
+		[1] = {8,0}, -- bag 1 has 8 free slots
+	}
+	myGear[1] = "113596" -- HeadSlot equipped
+	Stripper.Command("")
+	assertIsNil( myGear[1], "HeadSlot should be empty now." ) -- The item should be removed.
+end
+function test.testCommand_withGear_toBackpack_isFull()
+	bagInfo = {
+		[0] = {0,0}, -- backpack is full
+	}
+	myGear[1] = "113596" -- HeadSlot equipped
+	Stripper.Command("")
+	assertEquals( "113596", myGear[1], "Item should not have been removed.")
+end
+
 function test.testGetItemToRemove_NothingEquipped()
 	local result = Stripper.getItemToRemove()
 	assertIsNil( result )
@@ -85,6 +121,6 @@ function test.test_GetItemToRemove_HeadEquipped_Name()
 	local result = select(2, Stripper.getItemToRemove())
 	assertEquals( "HeadSlot", result )
 end
-function test.test_RemoveFromSlot()
-end
+--function test.test_RemoveFromSlot()
+--end
 test.run()
