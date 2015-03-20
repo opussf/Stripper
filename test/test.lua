@@ -19,6 +19,7 @@ function test.before()
 	bagInfo = {
 		[0] = {16, 0},
 	}
+	Stripper.isBusy = nil
 end
 function test.after()
 	myGear = {}
@@ -106,7 +107,6 @@ function test.testCommand_withGear_toBackpack_isFull()
 	Stripper.Command("")
 	assertEquals( "113596", myGear[1], "Item should not have been removed.")
 end
-
 function test.testGetItemToRemove_NothingEquipped()
 	local result = Stripper.getItemToRemove()
 	assertIsNil( result )
@@ -121,6 +121,7 @@ function test.test_GetItemToRemove_HeadEquipped_Name()
 	local result = select(2, Stripper.getItemToRemove())
 	assertEquals( "HeadSlot", result )
 end
+
 --function test.test_RemoveFromSlot()
 --end
 test.run()
