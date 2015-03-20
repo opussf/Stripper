@@ -65,7 +65,20 @@ function test.testGetFreeBag_HasFreeSpace_Bag1_HasSpace()
 	assertEquals( 1, bagId )
 end
 function test.testGetFreeBag_HasNoSpace()
+	bagInfo = {
+		[0] = {0,0},
+		[1] = {0,0},
+	}
+	local bagId = Stripper.getFreeBag()
+	assertIsNil( bagId, "Should be nil")
 end
+function test.testCommand_EquipSet_useTestSet()
+	Stripper.Command("testSet")
+end
+function test.testCommand_EquipSet_unknownEquipmentSet()
+	Stripper.Command("unknownSet")  -- this should not fail as it will not see the set, and just try to remove one.
+end
+
 
 function test.testCommand_Help()
 	-- Send the help command  -- no side effects to check on
@@ -121,6 +134,7 @@ function test.test_GetItemToRemove_HeadEquipped_Name()
 	local result = select(2, Stripper.getItemToRemove())
 	assertEquals( "HeadSlot", result )
 end
+
 
 --function test.test_RemoveFromSlot()
 --end
