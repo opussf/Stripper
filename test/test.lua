@@ -9,6 +9,7 @@ require "wowTest"
 
 -- Figure out how to parse the XML here, until then....
 StripperFrame = Frame
+Stripper_TimerBar = CreateStatusBar()
 
 -- require the file to test
 package.path = "../src/?.lua;'" .. package.path
@@ -20,6 +21,8 @@ function test.before()
 		[0] = {16, 0},
 	}
 	Stripper.isBusy = nil
+	Stripper.targetSet = nil
+	Stripper.targetSetItemArray = nil
 end
 function test.after()
 	myGear = {}
@@ -72,14 +75,45 @@ function test.testGetFreeBag_HasNoSpace()
 	local bagId = Stripper.getFreeBag()
 	assertIsNil( bagId, "Should be nil")
 end
-function test.testCommand_EquipSet_useTestSet()
+function test.testCommand_EquipSet_useTestSet_equipItem()
+	myGear = {} -- Naked
 	Stripper.Command("testSet")
+	assertEquals( "113596", myGear[1], "Item should have been equipped.")
 end
+function test.testCommand_EquipSet_useTestSet_isBusy_notEquipped()
+	myGear = {} -- Naked
+	Stripper.isBusy = true
+	Stripper.Command("testSet")
+	assertIsNil( myGear[1], "Item should not be equipped.")
+end
+function test.testCommand_EquipSet_useTestSet_replaceItem()
+	myInventory["113596"] = 1
+	myGear = { [1] = "113590", } -- something else equiped, replace it.
+	Stripper.Command("testSet")
+	assertEquals( "113596", myGear[1], "Item should have been replaced.")
+end
+function test.testCommand_EquipSet_useTestSet_isBusy_addLater_isSet()
+	myGear = {} -- Naked
+	Stripper.isBusy = true
+	Stripper.Command("testSet")
+	assertEquals( time(), Stripper.addLater, "Should be set to now." )
+end
+function test.testCommand_EquipSet_useTestSet_removeItem()
+	myGear = {[13] = "113590", } -- something is set in Trinket0Slot, it should be removed
+	Stripper.Command("testSet")
+	assertIsNil( myGear[13], "Item should not be equipped." )
+end
+function test.testCommand_EquipSet_useTestSet_addLater_isSet()
+	myGear = {[13] = "113590", } -- something is set in Trinket0Slot, it should be removed
+	Stripper.Command("testSet")
+	assertEquals( time() + Stripper.setWaitTime, Stripper.addLater )
+end
+
 function test.testCommand_EquipSet_unknownEquipmentSet()
+	myGear[1] = "113596" -- HeadSlot equipped
 	Stripper.Command("unknownSet")  -- this should not fail as it will not see the set, and just try to remove one.
+	assertIsNil( myGear[1], "HeadSlot should be empty now." ) -- The item should be removed.
 end
-
-
 function test.testCommand_Help()
 	-- Send the help command  -- no side effects to check on
 	Stripper.Command("help")
