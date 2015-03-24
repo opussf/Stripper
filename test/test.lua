@@ -108,12 +108,27 @@ function test.testCommand_EquipSet_useTestSet_addLater_isSet()
 	Stripper.Command("testSet")
 	assertEquals( time() + Stripper.setWaitTime, Stripper.addLater )
 end
-
+function test.testCommand_EquipSet_useTestSet_targetSet_isSet()
+	myGear = {[13] = "113590", } -- something is set in Trinket0Slot, it should be removed
+	Stripper.Command("testSet")
+	assertEquals( "testSet", Stripper.targetSet )
+end
 function test.testCommand_EquipSet_unknownEquipmentSet()
 	myGear[1] = "113596" -- HeadSlot equipped
 	Stripper.Command("unknownSet")  -- this should not fail as it will not see the set, and just try to remove one.
 	assertIsNil( myGear[1], "HeadSlot should be empty now." ) -- The item should be removed.
 end
+function test.testCommand_EquipSet_clearsTargetSet()
+
+end
+--[[
+Stripper.targetSet = nil
+		Stripper.targetSetItemArray = nil
+		Stripper.Print("Ending targetSet");
+		Stripper.addLater = nil;
+		Stripper_TimerBar:Hide()
+]]
+
 function test.testCommand_Help()
 	-- Send the help command  -- no side effects to check on
 	Stripper.Command("help")
