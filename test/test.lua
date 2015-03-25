@@ -118,17 +118,36 @@ function test.testCommand_EquipSet_unknownEquipmentSet()
 	Stripper.Command("unknownSet")  -- this should not fail as it will not see the set, and just try to remove one.
 	assertIsNil( myGear[1], "HeadSlot should be empty now." ) -- The item should be removed.
 end
-function test.testCommand_EquipSet_clearsTargetSet()
-
+function test.testCommand_EquipSet_clearsTargetSet_noChangesToBeMade_targetSetCleared()
+	-- The current process has Stripper only clear the target set one time period after the final item is used.
+	myGear = {[1] = "113596", } -- set already equipped
+	Stripper.Command("testSet")
+	assertIsNil( Stripper.targetSet )
+	assertIsNil( Stripper.targetSetItemArray )
 end
---[[
-Stripper.targetSet = nil
-		Stripper.targetSetItemArray = nil
-		Stripper.Print("Ending targetSet");
-		Stripper.addLater = nil;
-		Stripper_TimerBar:Hide()
-]]
-
+function test.testCommand_EquipSet_clearsTargetSet_noChangesToBeMade_addLaterCleared()
+	-- The current process has Stripper only clear the target set one time period after the final item is used.
+	myGear = {[1] = "113596", } -- set already equipped
+	Stripper.Command("testSet")
+	assertIsNil( Stripper.addLater )
+end
+function test.testCommand_EquipSet_clearsTargetSet_ChangesMade_targetSetCleared()
+	myInventory["113596"] = 1
+	myGear = {}
+	Stripper.Command("testSet")  -- equip the item
+	Stripper.addLater = time() - 1 -- force addLater to be in the past
+	Stripper.OnUpdate()  -- check that set is fully equipped, clear control vars
+	assertIsNil( Stripper.targetSet )
+	assertIsNil( Stripper.targetSetItemArray )
+end
+function test.testCommand_EquipSet_clearsTargetSet_ChangesMade_addLaterCleared()
+	myInventory["113596"] = 1
+	myGear = {}
+	Stripper.Command("testSet")  -- equip the item
+	Stripper.addLater = time() - 1 -- force addLater to be in the past
+	Stripper.OnUpdate()  -- check that set is fully equipped, clear control vars
+	assertIsNil( Stripper.addLater )
+end
 function test.testCommand_Help()
 	-- Send the help command  -- no side effects to check on
 	Stripper.Command("help")
