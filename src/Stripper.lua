@@ -74,6 +74,10 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
 	CombatTextSetActiveUnit("player");
 	StripperFrame:RegisterEvent("COMBAT_TEXT_UPDATE");
+	-- EQUIPMENT_SWAP_PENDING
+	-- EQUIPMENT_SWAP_FINISHED
+	-- ITEM_LOCK_CHANGED
+	-- PLAYER_EQUIPMENT_CHANGED
 
 	--register slash commands
 	SLASH_STRIPPER1 = "/stripper";
@@ -82,8 +86,8 @@ function Stripper.OnLoad()
 	SlashCmdList["STRIPPER"] = function(msg) Stripper.Command(msg); end
 end
 function Stripper.ADDON_LOADED()
-	Stripper.Print("Stripper loaded");
-	StripperFrame:UnregisterEvent("ADDON_LOADED");
+	Stripper.Print("Stripper loaded")
+	StripperFrame:UnregisterEvent("ADDON_LOADED")
 end
 function Stripper.PLAYER_REGEN_ENABLED()
 	--Stripper.Print("Out of combat");
@@ -125,11 +129,10 @@ function Stripper.getFreeBag()
 	local freeid, typeid
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
 		freeid, typeid = GetContainerNumFreeSlots(bagid)
-		if  freeid > 0 and typeid == 0 then
+		if freeid > 0 and typeid == 0 then
 			return bagid
 		end
 	end
-	return nil
 end
 function Stripper.getItemToRemove()
 	-- Finds the first item in the list of slots
@@ -144,7 +147,6 @@ function Stripper.getItemToRemove()
 	end
 	return nil;
 end
---[[
 function Stripper.RemoveFromSlot( slotName, report )
 	-- Remove an item from slotName with optional reporting
 	-- String: slotName to remove an item from
@@ -152,11 +154,12 @@ function Stripper.RemoveFromSlot( slotName, report )
 	ClearCursor()
 	local freeBagId = Stripper.getFreeBag()
 	--Stripper.Print("Found a free bag: "..freeBagId);
+
 	if freeBagId then
 		local slotNum = GetInventorySlotInfo( slotName )
 		--Stripper.Print(slotName..":"..slotNum..":"..(GetInventoryItemLink("player",slotNum) or "nil"))
 		if report then
-			Stripper.Print("Removing "..GetInventoryItemLink("player",slotNum) )
+			Stripper.Print( "Removing "..(GetInventoryItemLink("player",slotNum) or "nil") )
 		end
 		PickupInventoryItem(slotNum)
 		if freeBagId == 0 then
@@ -170,10 +173,7 @@ function Stripper.RemoveFromSlot( slotName, report )
 			Stripper.Print("No more stripping for you.  Inventory is full");
 		end
 	end
-	return nil
-
 end
-]]
 function Stripper.RemoveOne()
 	if Stripper.isBusy then
 		Stripper.removeLater = true;
@@ -189,7 +189,6 @@ function Stripper.RemoveOne()
 		Rested.commandList.ilvl();
 	end
 end
---[[
 function Stripper.AddOne()
 	-- Loop through the targetSetItemArray
 	-- Compare the item to the one in the slot.
@@ -212,13 +211,15 @@ function Stripper.AddOne()
 			end
 			local slotName = Stripper.slotListMap[i]
 			if slotName then
-				--Stripper.Print("slot: "..i.." equipped:"..(GetInventoryItemID("player",i) or "nil"))
-				--Stripper.Print("Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
 				local equipped = GetInventoryItemID("player",i)  -- nil if not equipped
+				--Stripper.Print("slot: "..i.." equipped:"..(equipped or "nil"))
+				--Stripper.Print("Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
 
 				if (Stripper.targetSetItemArray[i] ~= 1) and (equipped ~= Stripper.targetSetItemArray[i]) then
+					-- not to be ignored, and not the same item.
+					--print(Stripper.targetSetItemArray[i])
 					if (not Stripper.targetSetItemArray[i]) then  -- remove item  -- changed from 0 to nil?
-						--Stripper.Print( "Need to remove an item from "..slotName )
+						Stripper.Print( "Need to remove an item from "..slotName )
 						if Stripper.RemoveFromSlot( slotName, true ) then
 							Stripper.addLater = time()+Stripper.setWaitTime;
 							return
@@ -243,10 +244,9 @@ function Stripper.AddOne()
 						Stripper.Print("Slot "..i.." is nil?")
 					end
 				end
-				--print(i, Stripper.slotListMap[i], (GetItemInfo(Stripper.targetSetItemArray[i])));
+				--print(i, Stripper.slotListMap[i], equipped, (GetItemInfo(Stripper.targetSetItemArray[i])));
 			end
 		end
-
 		Stripper.targetSet = nil
 		Stripper.targetSetItemArray = nil
 		Stripper.Print("Ending targetSet");
@@ -254,7 +254,6 @@ function Stripper.AddOne()
 		Stripper_TimerBar:Hide()
 	end
 end
-]]
 --[[  -- Un-needed code
 function Stripper.Test()
 	if Stripper.targetSet then
