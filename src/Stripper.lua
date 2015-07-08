@@ -308,6 +308,9 @@ function Stripper.Command( msg )
 			Stripper.targetSet = setName
 			Stripper.Print("Set targetSet to "..Stripper.targetSet);
 			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet);
+			for k,v in pairs(Stripper.targetSetItemArray) do
+				Stripper.Print(k..":"..v)
+			end
 			Stripper.AddOne();
 		else
 			Stripper.commandList.remove.func()
