@@ -219,7 +219,7 @@ function Stripper.AddOne()
 					-- not to be ignored, and not the same item.
 					--print(Stripper.targetSetItemArray[i])
 					if (not Stripper.targetSetItemArray[i]) then  -- remove item  -- changed from 0 to nil?
-						Stripper.Print( "Need to remove an item from "..slotName )
+						-- Stripper.Print( "Need to remove an item from "..slotName )
 						if Stripper.RemoveFromSlot( slotName, true ) then
 							Stripper.addLater = time()+Stripper.setWaitTime;
 							return
