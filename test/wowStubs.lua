@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
 -- Date    :  $Date:$
--- Revision:  $Revision:$
+-- Revision:  @VERSION@
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -19,6 +19,8 @@ bagInfo = {
 	[0] = {16, 0},
 }
 myCurrencies = {}
+myCopper = 0
+-- myCopper is the amount of Copper that you own on this toon
 -- set one of these to the number of people in the raid or party to reflect being in group or raid.
 -- roster should be an array for GetRaidRosterInfo
 myParty = { ["group"] = nil, ["raid"] = nil, ["roster"] = {} }
@@ -40,16 +42,37 @@ SlotListMap={ "HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","Wais
 }
 myGear = {} -- items that are equipped in the above slots, index matching
 Items = {
-	["7073"] = {["name"] = "Broken Fang", ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
-	["6742"] = {["name"] = "UnBroken Fang", ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
-	["22261"]= {["name"] = "Love Fool", ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r"},
-	["49927"]= {["name"] = "Love Token", ["link"] = ""},
-	["74661"]= {["name"] = "Black Pepper", ["link"] = "|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r"},
-	["85216"]= {["name"] = "Enigma Seed", ["link"]= "|cffffffff|Hitem:85216:0:0:0:0:0:0:0:90:0:0|h[Enigma Seed]|h|r"},
-	["113596"] = {["name"] = "Head Thing", ["link"] = "|cffffffff|Hitem:113596:0:0:0:0:0:0:0:90:0:0|h[Head Thing|h|r", ["slotPrefix"] = "Head"},
-    -- ^^ Look up this item to build the correct link. (not super important)
-    -- ^^ Also need another head item for testing.
-    ["999999"] = {["name"] = "Finger Thing", ["link"] = "|cffffffff|Hitem:999999:0:0:0:0:0:0:0:90:0:0|h[Finger Thing|h|r", ["slotPrefix"] = "Finger"},
+	["7073"] = {["name"] = "Broken Fang", ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r", ["texture"] = ""},
+	["6742"] = {["name"] = "UnBroken Fang", ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r", ["texture"] = ""},
+	["22261"] = {["name"] = "Love Fool", ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r", ["texture"] = ""},
+	["23784"] = {["name"] = "Adamantite Frame", ["link"] = "|cff9d9d9d|Hitem:23784:0:0:0:0:0:0:0:80:0:0|h[Adanabtute Frame]|h|r", ["texture"] = ""},
+	["23786"] = {["name"] = "Khorium Power Core", ["link"] = "|cffffff|Hitem:23786|h[Khorium Power Core]|h|r", ["texture"] = ""},
+	["23787"] = {["name"] = "Felsteel Stabilizer", ["link"] = "|cffffff|Hitem:23787|h[Felsteel Stabilizer]|h|r", ["texture"] = ""},
+	["34061"] = {["name"] = "Turbo-Charged Flying Machine", ["link"] = "|cff9d9d9d|Hitem:34061:0:0:0:0:0:0:0:80:0:0|h[Turbo-Charged Flying Machine]|h|r", ["texture"] = ""},
+	["34249"] = {["name"] = "Hula Girl Doll", ["link"] = "|cffffff|Hitem:34249|h[Hula Girl Doll]|h|r", ["texture"] = ""},
+	["49916"] = {["name"] = "Lovely Charm Bracelet", ["link"] = "|cff9d9d9d|Hitem:49916:0:0:0:0:0:0:0:80:0:0|h[Lovely Charm Bracelet]|h|r", ["texture"] = ""},
+	["49927"] = {["name"] = "Love Token", ["link"] = "|cff9d9d9d|Hitem:49927:0:0:0:0:0:0:0:80:0:0|h[Love Token]|h|r", ["texture"] = ""},
+	["74661"] = {["name"] = "Black Pepper", ["link"] = "|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r", ["texture"] = ""},
+	["85216"] = {["name"] = "Enigma Seed", ["link"]= "|cffffffff|Hitem:85216:0:0:0:0:0:0:0:90:0:0|h[Enigma Seed]|h|r", ["texture"] = ""},
+	["113596"] = {["name"] = "Vilebreath Mask", ["link"] = "|cffffffff|Hitem:113596:0:0:0:0:0:0:0:90:0:0|h[Vilebreath Mask]|h|r", ["slotPrefix"] = "Head", ["texture"] = ""},
+--[[
+Vilebreath Mask
+Item Level 655
+Binds when picked up
+Head	Cloth
+85 Armor
++211 Intellect
++316 Stamina
++120 Mastery (1.09 @ L100)
++153 Multistrike (2.32% @ L100)
+Durability 100 / 100
+Requires Level 100
+Sell Price: 32 81 73
+Dropped by: Kargath Bladefist
+Drop Chance: 11.48%
+]]
+    -- ^^ Need another head item for testing.
+    ["999999"] = {["name"] = "Finger Thing", ["link"] = "|cffffffff|Hitem:999999:0:0:0:0:0:0:0:90:0:0|h[Finger Thing|h|r", ["slotPrefix"] = "Finger", ["texture"] = ""},
 }
 
 -- simulate the data structure that is the flight map
@@ -64,28 +87,25 @@ Currencies = {
 	["703"] = { ["name"] = "Fictional Currency", ["texturePath"] = "", ["weeklyMax"] = 1000, ["totalMax"] = 4000, isDiscovered = true, ["link"] = "|cffffffff|Hcurrency:703|h[Fictional Currency]|h|r"},
 }
 MerchantInventory = {
-	{["id"] = 7073, ["name"] = "Broken Fang", ["cost"] = 5000, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r"},
-	{["id"] = 6742, ["name"] = "UnBroken Fang", ["cost"] = 10000, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r"},
-	{["id"] = 22261, ["name"] = "Love Fool", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r",
-		["currencies"] = {{["id"] = 49927, ["quantity"] = 10},}},
-	{["id"] = 49927, ["name"] = "Love Token", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "",
-		["currencies"] = {{["id"] = 49916, ["quantity"] = 1},}},  -- Lovely Charm Bracelet
-	{["id"] = 74661, ["name"] = "Black Pepper", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1, ["link"] = "﻿|cffffffff|Hitem:74661:0:0:0:0:0:0:0:90:0:0|h[Black Pepper]|h|r",
-		["currencies"] = {{["id"] = 402, ["quantity"] = 1},}},
-	{["id"] = 85216, ["name"] = "Enigma Seed", ["cost"] = 2500, ["quantity"] = 1, ["isUsable"] = nil, ["link"]= "|cffffffff|Hitem:85216:0:0:0:0:0:0:0:90:0:0|h[Enigma Seed]|h|r"},
+	{["id"] = "7073", ["cost"] = 5000, ["quantity"] = 1, ["isUsable"] = 1},
+	{["id"] = "6742", ["cost"] = 10000, ["quantity"] = 1, ["isUsable"] = 1},
+	{["id"] = "22261", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
+		["currencies"] = {{["id"] = "49927", ["type"] = "item", ["quantity"] = 10},}},
+	{["id"] = "49927", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
+		["currencies"] = {{["id"] = "49916", ["type"] = "item", ["quantity"] = 1},}},  -- Lovely Charm Bracelet
+	{["id"] = "74661", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
+		["currencies"] = {{["id"] = "402", ["type"] = "currency", ["quantity"] = 1},}},
+	{["id"] = "85216", ["cost"] = 2500, ["quantity"] = 1, ["isUsable"] = nil},
 }
 TradeSkillItems = {
-	{["id"] = 44157, ["name"] = "Engineering: Turbo-Charged Flying Machine", ["cost"]= 0, ["numReagents"] = 4,
+	{["id"] = "44157", ["name"] = "Engineering: Turbo-Charged Flying Machine", ["cost"]= 0, ["numReagents"] = 4,
 		["minMade"] = 1, ["maxMade"] = 1,
 		["elink"] = "|cffffffff|Henchant:44157|h[Engineering: Turbo-Charged Flying Machine]|h|r",
 		["ilink"] = "|cff9d9d9d|Hitem:34061:0:0:0:0:0:0:0:80:0:0|h[Turbo-Charged Flying Machine]|h|r",
-		["reagents"] = {{["name"]="Adamantite Frame", ["texture"]="", ["count"]=4, ["id"]=23784},
-			{["name"]="Khorium Power Core", ["texture"]="", ["count"]=8, ["id"]=23786,
-					["link"] = "|cffffff|Hitem:23786|h[Khorium Power Core]|h|r"},
-			{["name"]="Felsteel Stabilizer", ["texture"]="", ["count"]=8, ["id"]=23787,
-					["link"] = "|cffffff|Hitem:23787|h[Felsteel Stabilizer]|h|r"},
-			{["name"]="Hula Girl Doll", ["texture"]="", ["count"]=1, ["id"]=34249,
-					["link"] = "|cffffff|Hitem:34249|h[Hula Girl Doll]|h|r"},
+		["reagents"] = {{["id"] = "23784", ["count"] = 4}, -- Adamantite Frame
+				{["id"] = "23786", ["count"] = 8},  -- Khorium Power Core
+				{["id"] = "23787", ["count"] = 8},  -- Felsteel Stabilizer
+				{["id"] = "34249", ["count"] = 1},  -- Hula Girl Doll
 		},
 	},
 }
@@ -93,6 +113,8 @@ TradeSkillItems = {
 EquipmentSets = {
 	{["name"] = "testSet", ["icon"] = "icon", ["items"] = {[1] = "113596"},},
 }
+-- WowToken
+TokenPrice = 123456 -- 12G 34S 45C
 
 -- WOW's function renames
 strmatch = string.match
@@ -102,6 +124,7 @@ strtolower = string.lower
 time = os.time
 date = os.date
 max = math.max
+min = math.min
 random = math.random
 tinsert = table.insert
 
@@ -130,19 +153,55 @@ FACTION_BAR_COLORS = {
 -- http://www.wowwiki.com/BagId
 NUM_BAG_SLOTS=4
 ATTACHMENTS_MAX_SEND=8
+ITEM_SOULBOUND="Soulbound"
+ITEM_BIND_ON_PICKUP="Binds when picked up"
 
 -- WOW's frames
 Frame = {
 		["Events"] = {},
 		["Hide"] = function() end,
+		["Show"] = function() end,
+		["IsShown"] = function() return(true) end,
 		["RegisterEvent"] = function(event) Frame.Events.event = true; end,
 		["SetPoint"] = function() end,
 		["UnregisterEvent"] = function(event) Frame.Events.event = nil; end,
+		["GetName"] = function(self) return self.framename end,
+		["SetFrameStrata"] = function() end,
+		["SetWidth"] = function(self, value) self.width = value; end,
+		["SetHeight"] = function(self, value) self.height = value; end,
+		["CreateFontString"] = function(self, ...) return(CreateFontString(...)) end,
+
+		["SetMinMaxValues"] = function() end,
+		["SetValue"] = function() end,
+		["SetStatusBarColor"] = function() end,
+
+}
+FrameGameTooltip = {
 		["GetName"] = function(self) return self.name end,
+		["SetOwner"] = function(self, newOwner) end, -- this is only for tooltip frames...
+		["ClearLines"] = function(self) end, -- this is only for tooltip frames...
+		["SetHyperlink"] = function(self, hyperLink) end, -- this is only for tooltip frames...
+		["init"] = function(frameName)
+			_G[frameName.."TextLeft2"] = CreateFontString(frameName.."TextLeft2")
+			_G[frameName.."TextLeft3"] = CreateFontString(frameName.."TextLeft3")
+			_G[frameName.."TextLeft4"] = CreateFontString(frameName.."TextLeft4")
+		end,
 }
 function CreateFrame( frameType, frameName, parentFrame, inheritFrame )
+--	print("CreateFrame: needing a new frame of type: "..(frameType or "nil"))
+	newFrame = Frame  -- deep copy of this?
+	if frameType and _G["Frame"..frameType] then  -- construct the name of the table to pull from, use _G to reference it.
+		for k, f in pairs(_G["Frame"..frameType]) do  -- add the methods in the sub frame to the returned frame
+			if k == "init" then  -- check to see if the key is 'init', which is a function to run when creating the Frame
+				f(frameName)  -- run the ["init"] function
+			else
+				newFrame[k] = f  -- add the method to the frame
+			end
+		end
+	end
+	frameName = newFrame
 	--http://www.wowwiki.com/API_CreateFrame
-	return Frame
+	return newFrame
 end
 
 function CreateFontString(name,...)
@@ -201,12 +260,12 @@ function BuyMerchantItem( index, quantity )
 	-- adds quantity of index to myInventory
 	-- no return value
 	local itemID = MerchantInventory[index].id
+
 	if myInventory[itemID] then
 		myInventory[itemID] = myInventory[itemID] + quantity
 	else
 		myInventory[itemID] = quantity
 	end
-	--INEED.UNIT_INVENTORY_CHANGED()
 end
 function CheckInbox()
 	-- http://www.wowwiki.com/API_CheckInbox
@@ -296,10 +355,53 @@ function GetAccountExpansionLevel()
 	-- returns 0 to 4 (5)
 	return accountExpansionLevel
 end
+function GetAchievementInfo( id, index )
+	-- http://wowprogramming.com/docs/api/GetAchievementInfo
+	-- Arguments:
+	-- id: achievement category ID or achievement ID
+	-- index: index of achievement in given category ID
+	-- Returns:
+	-- id: The numeric ID of the achievement or statistic (number)
+	-- name: Name of the achievement or statistic (string)
+    -- points: Amount of achievement points awarded for completing the achievement (number)
+	-- completed: True if any toon on the account has completed the achievement; otherwise false (boolean)
+	-- month: Month in which the player completed the achievement (number)
+	-- day: Day of the month on which the player completed the achievement (number)
+	-- year: Year in which the player completed the achievement. (Two digit year, assumed to be 21st century.) (number)
+	-- description: Description of the achievement (string)
+	-- flags: Test against the following masks with bit.band() to reveal additional information: (bitfield)
+	--		0x00000001 - Info is for a statistic, not an achievement
+	--		0x00000002 - Achievement should be hidden in normal displays
+	--		0x00000080 - Achievement should display its criteria as a progress bar regardless of per-criterion flags
+	-- icon: Path to an icon texture for the achievement (string)
+	-- rewardText: Text describing a reward for the achievement, or the empty string if no reward is offered (string)
+	-- isGuildAch: True if the achievement is a Guild achievement; otherwise false (boolean)
+	-- wasEarnedByMe: True if the achievement was earned by the player; otherwise false (boolean)
+	-- earnedBy: Who earned the achivement, if not the player; otherwise nil (string)
+
+end
+
 function GetAddOnMetadata(addon, field)
 	-- returns addonData[field] for 'addon'
 	-- local addonData = { ["version"] = "1.0", }
 	return addonData[field]
+end
+function GetCategoryList()
+	-- http://www.wowwiki.com/API_GetCategoryList
+	-- Returns a table of achievement categories
+	return {"10","47454"}
+end
+function GetCategoryNumAchievements( catID )
+	-- http://wowprogramming.com/docs/api/GetCategoryNumAchievements
+	-- http://wow.gamepedia.com/API_GetCategoryNumAchievements    <---  MUCH BETTER
+	-- Arguments:
+	-- catID: Category to return the number of displayable achievements
+	-- includeAll: (optional) boolean include all achievements, or just visible (if false)
+	-- Returns:
+	-- numItems: Number of achievements or stats to display
+	-- numCompleted: Number of completed achievements (or 0 for stats)
+	-- numIncomplete: Number of incomplete achievements
+	return 5,0,5
 end
 function GetCoinTextureString( copperIn, fontHeight )
 -- simulates the Wow function:  http://www.wowwiki.com/API_GetCoinTextureString
@@ -424,8 +526,14 @@ function GetMerchantItemCostItem( index, currencyIndex )
 	-- returns texture, value, and link for 1..GetMerchantItemCostInfo() for index item
 	if MerchantInventory[ index ] then  -- valid index
 		if MerchantInventory[ index ].currencies then  -- has alternate currencies
-			if MerchantInventory[ index ].currencies[ currencyIndex ] then
-				return "", MerchantInventory[ index ].currencies[ currencyIndex ].quantity, ""
+			if MerchantInventory[ index ].currencies[ currencyIndex ] then -- currencyIndex exists
+				local currencyLink = ""
+				if MerchantInventory[ index ].currencies[ currencyIndex ].type == "item" then
+					currencyLink = Items[ MerchantInventory[ index ].currencies[ currencyIndex ].id ].link
+				elseif MerchantInventory[ index ].currencies[ currencyIndex ].type == "currency" then
+					currencyLink = Currencies[ MerchantInventory[ index ].currencies[ currencyIndex ].id ].link
+				end
+				return "", MerchantInventory[ index ].currencies[ currencyIndex ].quantity, currencyLink
 			end
 		end
 	end
@@ -433,8 +541,8 @@ function GetMerchantItemCostItem( index, currencyIndex )
 end
 function GetMerchantItemLink( index )
 	-- returns a link for item at index
-	if MerchantInventory[ index ] then
-		return MerchantInventory[ index ].link
+	if MerchantInventory[ index ] and Items[ MerchantInventory[ index ].id ] then
+		return Items[ MerchantInventory[ index ].id ].link
 	else
 		return nil
 	end
@@ -442,8 +550,10 @@ end
 function GetMerchantItemInfo( index )
 	--local itemName, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo( i )
 	if MerchantInventory[ index ] then
-		local item = MerchantInventory[ index ]
-		return item.name, "", item.cost, item.quantity, -1, item.isUsable
+		local item = Items[ MerchantInventory[ index ].id ]
+		return item.name, item.texture, MerchantInventory[ index ].cost, MerchantInventory[ index ].quantity, -1, MerchantInventory[ index ].isUsable
+--		local item = MerchantInventory[ index ]
+--		return item.name, "", item.cost, item.quantity, -1, item.isUsable
 	end
 end
 function GetMerchantItemMaxStack( index )
@@ -454,6 +564,9 @@ function GetMerchantNumItems()
 	local count = 0
 	for _ in pairs(MerchantInventory) do count = count + 1 	end
 	return count
+end
+function GetMoney()
+	return myCopper
 end
 function GetNumEquipmentSets()
 	-- http://www.wowwiki.com/API_GetNumEquipmentSets
@@ -512,10 +625,11 @@ function GetTradeSkillItemLink( index )
 end
 function GetTradeSkillReagentInfo( skillIndex, reagentIndex )
 	-- reagentName, reagentTexture, reagentCount, playerReagentCount = GetTradeSkillReagentInfo(tradeSkillRecipeId, reagentId)
-	if TradeSkillItems[skillIndex] then
-		if TradeSkillItems[skillIndex].reagents[reagentIndex] then
-			return TradeSkillItems[skillIndex].reagents[reagentIndex].name, -- reagentName
-					"",  --reagentTexture
+	if TradeSkillItems[skillIndex] and TradeSkillItems[skillIndex].reagents[reagentIndex] then
+		local item = Items[ TradeSkillItems[ skillIndex ].reagents[ reagentIndex ].id ]
+		if item then
+			return item.name, -- reagentName
+					item.texture,  --reagentTexture
 					TradeSkillItems[skillIndex].reagents[reagentIndex].count, -- reagentCount
 					myInventory[TradeSkillItems[skillIndex].reagents[reagentIndex].id] or nil -- playerReagentCount
 		end
@@ -528,7 +642,7 @@ function GetTradeSkillReagentItemLink( skillIndex, reagentIndex )
 	-- returns LINK or NIL (?)
 	if TradeSkillItems[skillIndex] then
 		if TradeSkillItems[skillIndex].reagents[reagentIndex] then
-			return TradeSkillItems[skillIndex].reagents[reagentIndex].link
+			return Items[ TradeSkillItems[skillIndex].reagents[reagentIndex].id ].link
 		end
 	end
 end
@@ -546,9 +660,9 @@ end
 function HasNewMail()
 	return true
 end
+]]
 function InterfaceOptionsFrame_OpenToCategory()
 end
-]]
 function IsInGuild()
 	-- http://www.wowwiki.com/API_IsInGuild
 	-- 1, nil boolean return of being in guild
@@ -728,4 +842,21 @@ function UnitSex( who )
 		["player"] = 3,
 	}
 	return unitSex[who]
+end
+---------  C_WowTokenPublic
+C_WowTokenPublic = {}
+function C_WowTokenPublic.GetCommerceSystemStatus()
+	-- returns
+	-- [1] boolean - unsure
+	-- [2] seconds - minseconds between scans
+	-- [3] 0?
+	return true, 300, 0
+end
+function C_WowTokenPublic.GetCurrentMarketPrice()
+	-- returns the value, and a 2nd number (unknown)
+	return TokenPrice, 5
+end
+function C_WowTokenPublic.UpdateMarketPrice()
+	-- this has the system query the market price, and fire the TOKEN_MARKET_PRICE_UPDATED event
+	-- has no other side effects
 end
