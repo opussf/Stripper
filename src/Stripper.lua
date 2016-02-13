@@ -69,11 +69,16 @@ end
 
 -- Event Handlers
 function Stripper.OnLoad()
-	StripperFrame:RegisterEvent("ADDON_LOADED");
-	StripperFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
-	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
-	CombatTextSetActiveUnit("player");
-	StripperFrame:RegisterEvent("COMBAT_TEXT_UPDATE");
+	StripperFrame:RegisterEvent("ADDON_LOADED")
+	StripperFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+	CombatTextSetActiveUnit("player")
+	StripperFrame:RegisterEvent("COMBAT_TEXT_UPDATE")
+
+	StripperFrame:RegisterEvent("SYSMSG")
+	StripperFrame:RegisterEvent("UI_ERROR_MESSAGE")
+	StripperFrame:RegisterEvent("UI_INFO_MESSAGE")
+
 	-- EQUIPMENT_SWAP_PENDING
 	-- EQUIPMENT_SWAP_FINISHED
 	-- ITEM_LOCK_CHANGED
@@ -104,6 +109,15 @@ function Stripper.COMBAT_TEXT_UPDATE( arg1, arg2 )
 	end
 	--Stripper.Print("Combat_Text_Update( "..(arg1 or "nil")..", "..(arg2 or "nil").." ) "..(Stripper.isBusy and "true" or "false"));
 	Stripper.OnUpdate();
+end
+function Stripper.SYSMSG( msg )
+	Stripper.Print( "SYSMSG: "..msg )
+end
+function Stripper.UI_ERROR_MESSAGE( msg )
+	Stripper.Print( "UI_ERROR_MESSAGE: "..msg )
+end
+function Stripper.UI_INFO_MESSAGE( msg )
+	Stripper.Print( "UI_INFO_MESSAGE: "..msg )
 end
 function Stripper.OnUpdate()
 	if (not Stripper.isBusy) then
