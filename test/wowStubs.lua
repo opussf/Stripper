@@ -442,6 +442,11 @@ function GetCurrencyLink( id )
 		return Currencies[id].link
 	end
 end
+function GetCursorInfo()
+	-- http://wowprogramming.com/docs/api/GetCursorInfo
+	-- type, data, subType, subData = GetCursorInfo()
+	return nil
+end
 function GetEquipmentSetItemIDs( setName )
 	-- http://wowprogramming.com/docs/api/GetEquipmentSetItemIDs
 	-- Returns a table of item IDs keyed by slotID of items in the equipmentSet
