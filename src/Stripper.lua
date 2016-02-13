@@ -17,6 +17,7 @@ Stripper = {};
 Stripper.slotListMap={"HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","WaistSlot","LegsSlot",
 		"FeetSlot", "WristSlot", "HandsSlot", "Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot",
 		"BackSlot","MainHandSlot","SecondaryHandSlot","RangedSlot","TabardSlot"};
+Stripper.slotListMap[18] = nil  -- no RangedSlot
 
 Stripper.slotListRemove = {
 		"Trinket0Slot", "Trinket1Slot", "Finger0Slot",
@@ -75,9 +76,10 @@ function Stripper.OnLoad()
 	CombatTextSetActiveUnit("player")
 	StripperFrame:RegisterEvent("COMBAT_TEXT_UPDATE")
 
-	StripperFrame:RegisterEvent("SYSMSG")
+	StripperFrame:RegisterEvent("ITEM_LOCKED")
+	StripperFrame:RegisterEvent("ITEM_LOCK_CHANGED")
+	StripperFrame:RegisterEvent("ITEM_UNLOCKED")
 	StripperFrame:RegisterEvent("UI_ERROR_MESSAGE")
-	StripperFrame:RegisterEvent("UI_INFO_MESSAGE")
 
 	-- EQUIPMENT_SWAP_PENDING
 	-- EQUIPMENT_SWAP_FINISHED
@@ -110,15 +112,55 @@ function Stripper.COMBAT_TEXT_UPDATE( arg1, arg2 )
 	--Stripper.Print("Combat_Text_Update( "..(arg1 or "nil")..", "..(arg2 or "nil").." ) "..(Stripper.isBusy and "true" or "false"));
 	Stripper.OnUpdate();
 end
-function Stripper.SYSMSG( msg )
-	Stripper.Print( "SYSMSG: "..msg )
+function Stripper.ITEM_LOCKED( bag, slot )
+	if bag >= 0 then
+		--Stripper.Print("bag: "..bag.." slot: "..(slot or "nil").." ITEM_LOCKED")
+		Stripper.lockbag = bag
+		Stripper.lockslot = slot
+	end
 end
-function Stripper.UI_ERROR_MESSAGE( msg )
-	Stripper.Print( "UI_ERROR_MESSAGE: "..msg )
+function Stripper.ITEM_LOCK_CHANGED( bag, slot )
+	-- slot may be nil, chaning what bag holds
+	if bag >= 0 then
+		--Stripper.Print("bag: "..bag.." slot: "..(slot or "nil").." ITEM_LOCK_CHANGED")
+	end
 end
-function Stripper.UI_INFO_MESSAGE( msg )
-	Stripper.Print( "UI_INFO_MESSAGE: "..msg )
+function Stripper.ITEM_UNLOCKED( unknown1, unknown2 )
+	if unknown1 >= 0 then
+		--Stripper.Print("bag: "..(unknown1 or "nil").." slot: "..(unknown2 or "nil").." ITEM_UNLOCKED")
+		Stripper.lockbag = nil
+		Stripper.lockslot = nil
+	end
 end
+function Stripper.UI_ERROR_MESSAGE( message )
+	if (Stripper.lockbag and Stripper.lockslot) then
+		lockedItem = GetContainerItemID( Stripper.lockbag, Stripper.lockslot )
+		Stripper.Print("item:"..lockedItem.." is locked.")
+		slotName = select( 9, GetItemInfo(lockedItem) )
+		if slotName then
+			print("This can be equipped at slot: "..slotName..":".._G[slotName] )
+			slotNameModified = _G[slotName].."Slot"
+			slotNumClicked = GetInventorySlotInfo( slotNameModified )
+			print(slot) --Stripper.targetSetItemArray
+			if Stripper.targetSetItemArray then -- is equipping a set
+				Stripper.targetSetItemArray[slotNumClicked]=lockedItem
+			else -- not equipping set.  set one up
+				Stripper.targetSetItemArray = {}
+				for _,v in pairs(Stripper.slotListMap) do -- find all equipped items
+					slotNum = GetInventorySlotInfo(v)
+					itemId = GetInventoryItemID("player", slotNum)
+					if itemId then
+						print(v.."("..slotNum..") "..itemId)
+						Stripper.targetSetItemArray[slotNum] = itemId
+					end
+				end
+				Stripper.targetSetItemArray[slotNumClicked]=lockedItem
+				Stripper.AddOne()
+			end
+		end
+	end
+end
+
 function Stripper.OnUpdate()
 	if (not Stripper.isBusy) then
 		if Stripper.removeLater then
@@ -209,6 +251,9 @@ function Stripper.AddOne()
 	-- EquipSet id=1 is ignore
 
 	-- itemId = GetInventoryItemID("unit", invSlot)
+	for k,v in pairs(Stripper.targetSetItemArray) do
+		print( k..":"..v )
+	end
 
 	if Stripper.isBusy then
 		Stripper.addLater = time();
@@ -321,7 +366,7 @@ function Stripper.Command( msg )
 			Stripper.setWaitTime = tonumber(param) or 5
 			Stripper.targetSet = setName
 			Stripper.Print("Set targetSet to "..Stripper.targetSet);
-			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet);
+			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet) -- returns slot:id
 			Stripper.AddOne();
 		else
 			Stripper.commandList.remove.func()
