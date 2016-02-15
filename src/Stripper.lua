@@ -138,10 +138,10 @@ function Stripper.UI_ERROR_MESSAGE( message )
 		Stripper.Print("item:"..lockedItem.." is locked.")
 		slotName = select( 9, GetItemInfo(lockedItem) )
 		if slotName then
-			print("This can be equipped at slot: "..slotName..":".._G[slotName] )
 			slotNameModified = _G[slotName].."Slot"
+			print("This can be equipped at slot: "..slotName..":".._G[slotName]..":"..slotNameModified)
 			slotNumClicked = GetInventorySlotInfo( slotNameModified )
-			print(slot) --Stripper.targetSetItemArray
+			print(slotNumClicked) --Stripper.targetSetItemArray
 			if Stripper.targetSetItemArray then -- is equipping a set
 				Stripper.targetSetItemArray[slotNumClicked]=lockedItem
 			else -- not equipping set.  set one up
@@ -251,10 +251,6 @@ function Stripper.AddOne()
 	-- EquipSet id=1 is ignore
 
 	-- itemId = GetInventoryItemID("unit", invSlot)
-	for k,v in pairs(Stripper.targetSetItemArray) do
-		print( k..":"..v )
-	end
-
 	if Stripper.isBusy then
 		Stripper.addLater = time();
 		Stripper.Print("You are busy. An item will be equipped when you finish.");
