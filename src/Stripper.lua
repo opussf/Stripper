@@ -135,27 +135,29 @@ end
 function Stripper.UI_ERROR_MESSAGE( message )
 	if (Stripper.lockbag and Stripper.lockslot) then
 		lockedItem = GetContainerItemID( Stripper.lockbag, Stripper.lockslot )
-		Stripper.Print("item:"..lockedItem.." is locked.")
-		slotName = select( 9, GetItemInfo(lockedItem) )
-		if slotName then
-			slotNameModified = _G[slotName].."Slot"
-			print("This can be equipped at slot: "..slotName..":".._G[slotName]..":"..slotNameModified)
-			slotNumClicked = GetInventorySlotInfo( slotNameModified )
-			print(slotNumClicked) --Stripper.targetSetItemArray
-			if Stripper.targetSetItemArray then -- is equipping a set
-				Stripper.targetSetItemArray[slotNumClicked]=lockedItem
-			else -- not equipping set.  set one up
-				Stripper.targetSetItemArray = {}
-				for _,v in pairs(Stripper.slotListMap) do -- find all equipped items
-					slotNum = GetInventorySlotInfo(v)
-					itemId = GetInventoryItemID("player", slotNum)
-					if itemId then
-						print(v.."("..slotNum..") "..itemId)
-						Stripper.targetSetItemArray[slotNum] = itemId
+		if lockedItem then
+			Stripper.Print("item:"..(lockedItem or "nil").." is locked.")
+			slotName = select( 9, GetItemInfo(lockedItem) )
+			if slotName and _G[slotName] then
+				slotNameModified = _G[slotName].."Slot"
+				print("This can be equipped at slot: "..slotName..":".._G[slotName]..":"..slotNameModified)
+				slotNumClicked = GetInventorySlotInfo( slotNameModified )
+				print(slotNumClicked) --Stripper.targetSetItemArray
+				if Stripper.targetSetItemArray then -- is equipping a set
+					Stripper.targetSetItemArray[slotNumClicked]=lockedItem
+				else -- not equipping set.  set one up
+					Stripper.targetSetItemArray = {}
+					for _,v in pairs(Stripper.slotListMap) do -- find all equipped items
+						slotNum = GetInventorySlotInfo(v)
+						itemId = GetInventoryItemID("player", slotNum)
+						if itemId then
+							print(v.."("..slotNum..") "..itemId)
+							Stripper.targetSetItemArray[slotNum] = itemId
+						end
 					end
+					Stripper.targetSetItemArray[slotNumClicked]=lockedItem
+					Stripper.AddOne()
 				end
-				Stripper.targetSetItemArray[slotNumClicked]=lockedItem
-				Stripper.AddOne()
 			end
 		end
 	end
