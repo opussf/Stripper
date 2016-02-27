@@ -2,13 +2,12 @@ language: lua
 before_install:
   - sudo apt-get install lua5.1
 script: ant clean package
-#addons:
-#  debug: true
-#  provider: releases
-#  skip_cleanup: true
-#  api_key: fc8015e5e02a79718389d2b5469b2dffc987336c
-#  on:
-#    tags: true
-#  file:
-#    - target/*.zip
-#    - target/*.md5
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key: fc8015e5e02a79718389d2b5469b2dffc987336c
+  on:
+    tags: true
+  file:
+    - target/*.zip
+    - target/*.md5
