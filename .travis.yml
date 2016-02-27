@@ -6,6 +6,6 @@ addons:
   artifacts: true
   debug: true
   paths:
-  	- target/*.zip
-  	- target/*.md5
+  - target/*.zip
+  - target/*.md5
 
