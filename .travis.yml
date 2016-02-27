@@ -12,4 +12,3 @@ addons:
   file:
     - target/*.zip
     - target/*.md5
-
