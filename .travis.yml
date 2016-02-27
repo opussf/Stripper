@@ -2,4 +2,10 @@ language: lua
 before_install:
   - sudo apt-get install lua5.1
 script: ant clean package
+addons:
+  artifacts: true
+  debug: true
+  paths:
+  	- target/*.zip
+  	- target/*.md5
 
