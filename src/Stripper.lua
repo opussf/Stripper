@@ -106,6 +106,10 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
 	CombatTextSetActiveUnit("player");
 	StripperFrame:RegisterEvent("COMBAT_TEXT_UPDATE");
+	-- EQUIPMENT_SWAP_PENDING
+	-- EQUIPMENT_SWAP_FINISHED
+	-- ITEM_LOCK_CHANGED
+	-- PLAYER_EQUIPMENT_CHANGED
 
 	--register slash commands
 	SLASH_STRIPPER1 = "/stripper";
@@ -114,8 +118,8 @@ function Stripper.OnLoad()
 	SlashCmdList["STRIPPER"] = function(msg) Stripper.Command(msg); end
 end
 function Stripper.ADDON_LOADED()
-	Stripper.Print("Stripper loaded");
-	StripperFrame:UnregisterEvent("ADDON_LOADED");
+	Stripper.Print("Stripper loaded")
+	StripperFrame:UnregisterEvent("ADDON_LOADED")
 end
 function Stripper.PLAYER_REGEN_ENABLED()
 	--Stripper.Print("Out of combat");
@@ -145,7 +149,6 @@ function Stripper.OnUpdate()
 		Stripper.updateBar()
 	end
 end
-
 function Stripper.updateBar()
 	Stripper_TimerBar:Show()
 	Stripper_TimerBar:SetMinMaxValues( 0, Stripper.setWaitTime )
@@ -154,20 +157,20 @@ function Stripper.updateBar()
 end
 function Stripper.getFreeBag()
 	-- http://www.wowwiki.com/BagId
+	-- bags are 0 based, right to left.  0 = backpack
 	local freeid, typeid
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
 		freeid, typeid = GetContainerNumFreeSlots(bagid)
-		if  freeid > 0 and typeid == 0 then
+		if freeid > 0 and typeid == 0 then
 			return bagid
 		end
 	end
-	return nil
 end
 function Stripper.getItemToRemove()
 	-- Finds the first item in the list of slots
 	-- Returns: slotNum, slotName
 	for _,v in pairs(Stripper.slotListRemove) do
-		local slotNum = GetInventorySlotInfo(v);
+		local slotNum = GetInventorySlotInfo(v)
 		local itemId = GetInventoryItemID("player", slotNum);
 		if itemId then
 			--Stripper.Print(v..":"..itemId);
@@ -177,14 +180,18 @@ function Stripper.getItemToRemove()
 	return nil;
 end
 function Stripper.RemoveFromSlot( slotName, report )
+	-- Remove an item from slotName with optional reporting
+	-- String: slotName to remove an item from
+	-- Boolean: report - to report or not.
 	ClearCursor()
 	local freeBagId = Stripper.getFreeBag()
 	--Stripper.Print("Found a free bag: "..freeBagId);
+
 	if freeBagId then
 		local slotNum = GetInventorySlotInfo( slotName )
 		--Stripper.Print(slotName..":"..slotNum..":"..(GetInventoryItemLink("player",slotNum) or "nil"))
 		if report then
-			Stripper.Print("Removing "..GetInventoryItemLink("player",slotNum) )
+			Stripper.Print( "Removing "..(GetInventoryItemLink("player",slotNum) or "nil") )
 		end
 		PickupInventoryItem(slotNum)
 		if freeBagId == 0 then
@@ -198,8 +205,6 @@ function Stripper.RemoveFromSlot( slotName, report )
 			Stripper.Print("No more stripping for you.  Inventory is full");
 		end
 	end
-	return nil
-
 end
 function Stripper.RemoveOne()
 	if Stripper.isBusy then
@@ -238,11 +243,13 @@ function Stripper.AddOne()
 			end
 			local slotName = Stripper.slotListMap[i]
 			if slotName then
-				--Stripper.Print("slot: "..i.." equipped:"..(GetInventoryItemID("player",i) or "nil"))
-				--Stripper.Print("Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
 				local equipped = GetInventoryItemID("player",i)  -- nil if not equipped
+				--Stripper.Print("slot: "..i.." equipped:"..(equipped or "nil"))
+				--Stripper.Print("Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
 
 				if (Stripper.targetSetItemArray[i] ~= 1) and (equipped ~= Stripper.targetSetItemArray[i]) then
+					-- not to be ignored, and not the same item.
+					--print(Stripper.targetSetItemArray[i])
 					if (not Stripper.targetSetItemArray[i]) then  -- remove item  -- changed from 0 to nil?
 						-- Stripper.Print( "Need to remove an item from "..slotName )
 						if Stripper.RemoveFromSlot( slotName, true ) then
@@ -267,10 +274,9 @@ function Stripper.AddOne()
 						end
 					end
 				end
-				--print(i, Stripper.slotListMap[i], (GetItemInfo(Stripper.targetSetItemArray[i])));
+				--print(i, Stripper.slotListMap[i], equipped, (GetItemInfo(Stripper.targetSetItemArray[i])));
 			end
 		end
-
 		Stripper.targetSet = nil
 		Stripper.targetSetItemArray = nil
 		Stripper.Print("Ending targetSet");
@@ -278,7 +284,7 @@ function Stripper.AddOne()
 		Stripper_TimerBar:Hide()
 	end
 end
-
+--[[  -- Un-needed code
 function Stripper.Test()
 	if Stripper.targetSet then
 		Stripper.Print("A targetSet is set:"..Stripper.targetSet);
@@ -291,5 +297,50 @@ function Stripper.Test()
 		end
 
 
+	end
+end
+]]
+
+-- Command code
+function Stripper.PrintHelp()
+	Stripper.Print(STRIPPER_MSG_ADDONNAME.." version: "..STRIPPER_MSG_VERSION)
+	Stripper.Print("Use: /stripper, /st, or /mm for these commands:")
+
+
+	for cmd, info in pairs(Stripper.commandList) do
+		Stripper.Print(string.format("-- %s %s -> %s",
+			cmd, info.help[1], info.help[2]));
+	end
+end
+Stripper.commandList = {
+	["help"] = {
+		["func"] = Stripper.PrintHelp,
+		["help"] = {"", "Print this help"},
+	},
+	["remove"] = {
+		["func"] = Stripper.RemoveOne,
+		["help"] = {"", "Remove a piece of gear. Default action."},
+	},
+	["<EquipmentSet>"] = {
+		["help"] = {"<delay seconds>", "Change to <EquipmentSet>, one piece every <delay seconds>"}
+	},
+}
+function Stripper.Command( msg )
+	local cmd, param = Stripper.ParseCmd(msg);
+	cmd = string.lower(cmd);
+	local cmdFunc = Stripper.commandList[cmd];
+	if cmdFunc then
+		cmdFunc.func(param);
+	else
+		local setName = isEquipmentSet(cmd);
+		if setName then
+			Stripper.setWaitTime = tonumber(param) or 5
+			Stripper.targetSet = setName
+			Stripper.Print("Set targetSet to "..Stripper.targetSet);
+			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet);
+			Stripper.AddOne();
+		else
+			Stripper.commandList.remove.func()
+		end
 	end
 end
