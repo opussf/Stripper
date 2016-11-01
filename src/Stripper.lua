@@ -234,9 +234,13 @@ function Stripper.AddOne()
 	else
 		ClearCursor();
 		local i = 0
-		for _,v in pairs(Stripper.slotListAdd) do -- Loop through the slot list
-			for ii=1, 19 do                    -- find the index number
-				if (v == Stripper.slotListMap[ii]) and (Stripper.targetSetItemArray[ii] and Stripper.targetSetItemArray[ii] >= 0) then
+		for _,slotName in pairs(Stripper.slotListAdd) do -- Loop through the slot list
+			for innerIndex=1, 19 do                    -- find the index number
+				print( Stripper.slotListMap[innerIndex] )
+				print( Stripper.targetSetItemArray[innerIndex] )
+				if (slotName == Stripper.slotListMap[innerIndex])
+						and (Stripper.targetSetItemArray[innerIndex]
+						and tonumber(Stripper.targetSetItemArray[innerIndex]) >= 0) then
 					i = ii
 					break
 				end
@@ -270,7 +274,7 @@ function Stripper.AddOne()
 						else
 							Stripper.Print( (itemLink or "unknown").." is not available to equip to "..slotName )
 							Stripper.targetSetItemArray[i] = nil
-							break -- break from the for loop if item is not inventory
+							--break -- break from the for loop if item is not inventory
 						end
 					end
 				end
