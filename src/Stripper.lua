@@ -69,11 +69,11 @@ end
 
 -- Event Handlers
 function Stripper.OnLoad()
-	StripperFrame:RegisterEvent("ADDON_LOADED");
-	StripperFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
-	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED");
-	CombatTextSetActiveUnit("player");
-	StripperFrame:RegisterEvent("COMBAT_TEXT_UPDATE");
+	StripperFrame:RegisterEvent("ADDON_LOADED")
+	StripperFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+	StripperFrame:RegisterEvent("UNIT_AURA")
+
 	-- EQUIPMENT_SWAP_PENDING
 	-- EQUIPMENT_SWAP_FINISHED
 	-- ITEM_LOCK_CHANGED
@@ -98,12 +98,11 @@ function Stripper.PLAYER_REGEN_DISABLED()
 	--Stripper.Print("In combat");
 	Stripper.isBusy = true;
 end
-function Stripper.COMBAT_TEXT_UPDATE( arg1, arg2 )
-	if (arg2 == "Fishing") then
-		Stripper.isBusy = (arg1 == "SPELL_AURA_START");
+function Stripper.UNIT_AURA( arg1 )
+	if (arg1 == "player") then
+		Stripper.isBusy = UnitAura( arg1, "Fishing" )
 	end
-	--Stripper.Print("Combat_Text_Update( "..(arg1 or "nil")..", "..(arg2 or "nil").." ) "..(Stripper.isBusy and "true" or "false"));
-	Stripper.OnUpdate();
+	--Stripper.Print("UNIT_AURA: busy: "..(Stripper.isBusy and "true" or "false"))
 end
 function Stripper.OnUpdate()
 	if (not Stripper.isBusy) then
@@ -275,7 +274,6 @@ end
 function Stripper.PrintHelp()
 	Stripper.Print(STRIPPER_MSG_ADDONNAME.." version: "..STRIPPER_MSG_VERSION)
 	Stripper.Print("Use: /stripper, /st, or /mm for these commands:")
-
 
 	for cmd, info in pairs(Stripper.commandList) do
 		Stripper.Print(string.format("-- %s %s -> %s",
