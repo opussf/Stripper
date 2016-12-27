@@ -5,6 +5,7 @@
 	<property environment="env"/>
 	<property name="env.BUILD_NUMBER" value=""/>
 	<property name="build.number" value=""/>
+	<property name="addon.dir" location="/Applications/World of Warcraft/Interface/Addons/${ant.project.name}"/>
 	<!--  Pull git repo info -->
 	<!-- Get the last tag reachable from this branch -->
 	<exec executable="git" dir="." outputproperty="git.tag" failifexecutionfails="false" errorproperty="">
@@ -97,7 +98,6 @@
 	</target>
 
 	<target name="wow" depends="test" description="copy files to currnet wow install">
-		<property name="addon.dir" location="/Applications/World of Warcraft/Interface/Addons/${ant.project.name}"/>
 		<mkdir dir="${addon.dir}"/>
 		<copy todir="${addon.dir}" filtering="true">
 			<fileset dir="src">
@@ -107,6 +107,12 @@
 				<include name="Readme.txt"/>
 			</fileset>
 		</copy>
+	</target>
+
+	<target name="open" description="open the addon dir in the current wow install">
+		<exec executable="open">
+			<arg value="${addon.dir}"/>
+		</exec>
 	</target>
 
 	<target name="test" description="run unit tests" if="test.check">
