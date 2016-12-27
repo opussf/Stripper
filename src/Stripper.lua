@@ -39,6 +39,12 @@ Stripper.slotListNum = 17
 Stripper.setWaitTime = 5
 -- TODO: Make the setWaitTime an option
 
+Stripper.bitFields = {
+	["combat"] = 0x01,
+	["fishing"] = 0x02,
+}
+
+
 -- Support code
 function Stripper.Print( msg, showName)
 	-- print to the chat frame
@@ -91,18 +97,33 @@ function Stripper.ADDON_LOADED()
 end
 function Stripper.PLAYER_REGEN_ENABLED()
 	--Stripper.Print("Out of combat");
-	Stripper.isBusy = nil;
+	Stripper.clearIsBusy( Stripper.bitFields.combat )
+	--Stripper.isBusy = nil;
 	Stripper.OnUpdate();
 end
 function Stripper.PLAYER_REGEN_DISABLED()
 	--Stripper.Print("In combat");
-	Stripper.isBusy = true;
+	Stripper.setIsBusy( Stripper.bitFields.combat )
+	--Stripper.isBusy = true;
 end
 function Stripper.UNIT_AURA( arg1 )
 	if (arg1 == "player") then
-		Stripper.isBusy = UnitAura( arg1, "Fishing" )
+		if UnitAura( arg1, "Fishing" ) then
+			Stripper.setIsBusy( Stripper.bitFields.fishing )
+		else
+			Stripper.clearIsBusy( Stripper.bitFields.fishing )
+		end
+		--Stripper.isBusy = UnitAura( arg1, "Fishing" )
 	end
 	--Stripper.Print("UNIT_AURA: busy: "..(Stripper.isBusy and "true" or "false"))
+end
+function Stripper.setIsBusy( valIn )
+	Stripper.isBusy = bit.bor( (Stripper.isBusy or 0), valIn )
+end
+function Stripper.clearIsBusy( valIn )
+	valIn = bit.bnot( valIn )
+	Stripper.isBusy = bit.band( (Stripper.isBusy or 0), valIn )
+	if (Stripper.isBusy == 0) then Stripper.isBusy = nil; end
 end
 function Stripper.OnUpdate()
 	if (not Stripper.isBusy) then
