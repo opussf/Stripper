@@ -14,10 +14,11 @@ COLOR_NEON_BLUE = "|cff4d4dff";
 COLOR_END = "|r";
 
 Stripper = {};
-Stripper.slotListMap={"HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","WaistSlot","LegsSlot",
+Stripper.slotListMap={
+		"HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","WaistSlot","LegsSlot",
 		"FeetSlot", "WristSlot", "HandsSlot", "Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot",
-		"BackSlot","MainHandSlot","SecondaryHandSlot","RangedSlot","TabardSlot"};
-
+		"BackSlot","MainHandSlot","SecondaryHandSlot","RangedSlot","TabardSlot"
+}
 Stripper.slotListRemove = {
 		"Trinket0Slot", "Trinket1Slot", "Finger0Slot",
 		"Finger1Slot", "NeckSlot", "BackSlot",
@@ -25,7 +26,7 @@ Stripper.slotListRemove = {
 		"FeetSlot", "ShoulderSlot", "HeadSlot",
 		"LegsSlot","ChestSlot",	"ShirtSlot",
 		"SecondaryHandSlot", "MainHandSlot"
-};
+}
 Stripper.slotListAdd = {
 		"Trinket0Slot", "Trinket1Slot", "Finger0Slot",
 		"Finger1Slot", "NeckSlot", "BackSlot",
@@ -34,16 +35,12 @@ Stripper.slotListAdd = {
 		"LegsSlot", "ShirtSlot", "ChestSlot",
 		"MainHandSlot", "SecondaryHandSlot"
 }
-Stripper.slotListNum = 17
-
 Stripper.setWaitTime = 5
--- TODO: Make the setWaitTime an option
 
 Stripper.bitFields = {
 	["combat"] = 0x01,
 	["fishing"] = 0x02,
 }
-
 
 -- Support code
 function Stripper.Print( msg, showName)
@@ -72,7 +69,6 @@ function isEquipmentSet( testStr )
 	end
 	return nil;
 end
-
 -- Event Handlers
 function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("ADDON_LOADED")
@@ -108,14 +104,12 @@ function Stripper.PLAYER_REGEN_DISABLED()
 end
 function Stripper.UNIT_AURA( arg1 )
 	if (arg1 == "player") then
-		if UnitAura( arg1, "Fishing" ) then
+		if (UnitAura( arg1, "Fishing" )) then
 			Stripper.setIsBusy( Stripper.bitFields.fishing )
 		else
 			Stripper.clearIsBusy( Stripper.bitFields.fishing )
 		end
-		--Stripper.isBusy = UnitAura( arg1, "Fishing" )
 	end
-	--Stripper.Print("UNIT_AURA: busy: "..(Stripper.isBusy and "true" or "false"))
 end
 function Stripper.setIsBusy( valIn )
 	Stripper.isBusy = bit.bor( (Stripper.isBusy or 0), valIn )
@@ -159,13 +153,12 @@ function Stripper.getItemToRemove()
 	-- Returns: slotNum, slotName
 	for _,v in pairs(Stripper.slotListRemove) do
 		local slotNum = GetInventorySlotInfo(v)
-		local itemId = GetInventoryItemID("player", slotNum);
+		local itemId = GetInventoryItemID("player", slotNum)
 		if itemId then
 			--Stripper.Print(v..":"..itemId);
-			return slotNum, v;
+			return slotNum, v
 		end
 	end
-	return nil;
 end
 function Stripper.RemoveFromSlot( slotName, report )
 	-- Remove an item from slotName with optional reporting
@@ -274,23 +267,6 @@ function Stripper.AddOne()
 		Stripper_TimerBar:Hide()
 	end
 end
---[[  -- Un-needed code
-function Stripper.Test()
-	if Stripper.targetSet then
-		Stripper.Print("A targetSet is set:"..Stripper.targetSet);
-
-		local itemIDs = {};
-		GetEquipmentSetLocations(Stripper.targetSet, itemIDs);
-		for k,v in pairs(itemIDs) do
-			local player, bank, bags, location, bag = EquipmentManager_UnpackLocation(v);
-			Stripper.Print(k..":"..v..":"..(player and "inInv" or "nil")..":"..(bank and "inBank" or "nil")..":"..(bags and "inBags" or "nil")..":"..location..":"..(bag or "nil"));
-		end
-
-
-	end
-end
-]]
-
 -- Command code
 function Stripper.PrintHelp()
 	Stripper.Print(STRIPPER_MSG_ADDONNAME.." version: "..STRIPPER_MSG_VERSION)
