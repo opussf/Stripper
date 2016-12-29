@@ -31,31 +31,38 @@ function test.testOnLoad()
 	-- This may seem noop, but it tests that the OnLoad throws no errors
 	assertTrue( SlashCmdList["STRIPPER"] )
 end
-function test.notestPlayerIsBusy_EntersCombat()
+function test.testPlayerIsBusy_EntersCombat()
 	-- @TODO: Fix this
 	-- Assure that isBusy is set correctly
 	Stripper.PLAYER_REGEN_DISABLED()
 	assertTrue( Stripper.isBusy )
 	Stripper.PLAYER_REGEN_ENABLED()
 end
-function test.notestPlayerIsBusy_LeavesCombat()
+function test.testPlayerIsBusy_LeavesCombat()
 	-- @TODO: Fix this
 	-- Assure that isBusy is cleared correctly
 	Stripper.PLAYER_REGEN_DISABLED()
 	Stripper.PLAYER_REGEN_ENABLED()
 	assertIsNil( Stripper.isBusy )
 end
-function test.notestPlayerIsBusy_StartsFishing()
+function test.testPlayerIsBusy_StartsFishing()
 	-- @TODO: Fix this
+	-- Setup that UnitAura returns fishing
 	assertFalse( Stripper.isBusy, "Should not be busy" )
-	Stripper.COMBAT_TEXT_UPDATE( "SPELL_AURA_START", "Fishing" ) -- start fishing event
+	wowSetAura( "player", "Fishing" )
+	Stripper.UNIT_AURA( "player" ) -- start fishing event
 	assertTrue( Stripper.isBusy, "Should be busy" )
 end
-function test.notestPlayerIsBusy_EndsFishing()
+function test.testPlayerIsBusy_EndsFishing()
 	-- @TODO: Fix this
-	Stripper.COMBAT_TEXT_UPDATE( "SPELL_AURA_START", "Fishing" ) -- start fishing event
+	-- Setup that UnitAura returns true for fishing
+	wowSetAura( "player", "Fishing" )
+	--Stripper.UNIT_AURA( "SPELL_AURA_START", "Fishing" ) -- start fishing event
+	Stripper.UNIT_AURA( "player" ) -- start fishing event
 	assertTrue( Stripper.isBusy, "Should be busy" )
-	Stripper.COMBAT_TEXT_UPDATE( "SPELL_AURA_REMOVED", "Fishing" ) -- start fishing event
+	--Stripper.COMBAT_TEXT_UPDATE( "SPELL_AURA_REMOVED", "Fishing" ) -- start fishing event
+	wowClearAura( "player", "Fishing" )
+	Stripper.UNIT_AURA( "player" ) -- start fishing event
 	assertFalse( Stripper.isBusy )
 end
 function test.testGetFreeBag_HasFreeSpace_OnlyBackpack_Empty()
@@ -206,6 +213,37 @@ function test.test_GetItemToRemove_HeadEquipped_Name()
 	local result = select(2, Stripper.getItemToRemove())
 	assertEquals( "HeadSlot", result )
 end
+function test.test_SetIsBusy_01()
+	Stripper.isBusy = nil
+	Stripper.setIsBusy( 0x01 )
+	assertEquals( 0x01, Stripper.isBusy )
+end
+function test.test_SetIsBusy_02()
+	Stripper.isBusy = 0x01
+	Stripper.setIsBusy( 0x02 )
+	assertEquals( 0x03, Stripper.isBusy )
+end
+function test.test_SetIsBusy_03()
+	Stripper.isBusy = 0x01
+	Stripper.setIsBusy( 0x01 )
+	assertEquals( 0x01, Stripper.isBusy )
+end
+function test.test_ClearIsBusy_01()
+	Stripper.isBusy = 0x01
+	Stripper.clearIsBusy( 0x01 )
+	assertIsNil( Stripper.isBusy )
+end
+function test.test_ClearIsBusy_02()
+	Stripper.isBusy = 0x03
+	Stripper.clearIsBusy( 0x02 )
+	assertEquals( 0x01, Stripper.isBusy )
+end
+function test.test_ClearIsBusy_03()
+	Stripper.isBusy = 0x01
+	Stripper.clearIsBusy( 0x02 )
+	assertEquals( 0x01, Stripper.isBusy )
+end
+
 
 
 --function test.test_RemoveFromSlot()
