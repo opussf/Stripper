@@ -62,12 +62,13 @@ function Stripper.ParseCmd(msg)
 	end
 end
 function isEquipmentSet( testStr )
-	for setNum = 1, GetNumEquipmentSets(),1 do
-		if (string.lower(GetEquipmentSetInfo(setNum)) == testStr) then
-			return GetEquipmentSetInfo(setNum);
+	for setNum = 0, C_EquipmentSet.GetNumEquipmentSets(),1 do
+		equipmentSetName = C_EquipmentSet.GetEquipmentSetInfo( setNum )
+		if( equipmentSetName and string.lower( equipmentSetName ) == testStr ) then
+			return C_EquipmentSet.GetEquipmentSetInfo( setNum ), setNum
 		end
 	end
-	return nil;
+	return nil
 end
 -- Event Handlers
 function Stripper.OnLoad()
@@ -104,10 +105,13 @@ function Stripper.PLAYER_REGEN_DISABLED()
 end
 function Stripper.UNIT_AURA( arg1 )
 	if (arg1 == "player") then
-		if (UnitAura( arg1, "Fishing" )) then
-			Stripper.setIsBusy( Stripper.bitFields.fishing )
-		else
-			Stripper.clearIsBusy( Stripper.bitFields.fishing )
+		Stripper.clearIsBusy( Stripper.bitFields.fishing )
+		for an = 1,40 do
+			aName = UnitAura( arg1, an )
+			if( aName == "Fishing" ) then
+				Stripper.setIsBusy( Stripper.bitFields.fishing )
+				break
+			end
 		end
 	end
 end
@@ -199,7 +203,7 @@ function Stripper.RemoveOne()
 		Stripper.removeLater = nil;
 	end
 	if Rested then
-		Rested.commandList.ilvl();
+		--Rested.Command( "iLvl" )
 	end
 end
 function Stripper.AddOne()
@@ -297,12 +301,12 @@ function Stripper.Command( msg )
 	if cmdFunc then
 		cmdFunc.func(param);
 	else
-		local setName = isEquipmentSet(cmd);
+		local setName, setNum = isEquipmentSet(cmd);
 		if setName then
 			Stripper.setWaitTime = tonumber(param) or 5
 			Stripper.targetSet = setName
 			Stripper.Print("Set targetSet to "..Stripper.targetSet);
-			Stripper.targetSetItemArray = GetEquipmentSetItemIDs(Stripper.targetSet);
+			Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
 			Stripper.AddOne();
 		else
 			Stripper.commandList.remove.func()
