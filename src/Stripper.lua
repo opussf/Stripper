@@ -108,7 +108,7 @@ function Stripper.UNIT_AURA( arg1 )
 		Stripper.clearIsBusy( Stripper.bitFields.fishing )
 		for an = 1,40 do
 			aName = UnitAura( arg1, an )
-			if( aName == "Fishing" ) then
+			if( aName and aName == "Fishing" ) then
 				Stripper.setIsBusy( Stripper.bitFields.fishing )
 				break
 			end

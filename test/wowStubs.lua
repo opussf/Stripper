@@ -209,27 +209,25 @@ FactionInfo = {
 -- IIRC (Look this up) Auras are index based, use an index based system
 -- ["unit"] = { [1] = { ["Fishing"] = true }}
 UnitAuras = {}
---UnitAuras = {["player"] = { { ["Fishing"] = true } } }
+--UnitAuras = {["player"] = { { ["name"] = "Fishing" } } }
 -- 'support' code for setting / clearing auras
 function wowSetAura( unit, auraName )
 	if (UnitAuras[unit]) then
 		for i, auras in pairs( UnitAuras[unit] ) do
-			if ( auras[auraName] ) then
+			if( auras.name == auraName ) then
 				return
 			end
 		end
-		table.insert( UnitAuras[unit], { { [auraName] = true } } )
+		table.insert( UnitAuras[unit], { { ["name"] = auraName } } )
 	else  -- unknown unit
-		UnitAuras[unit] = { { [auraName] = true } }
+		UnitAuras[unit] = { { ["name"] = auraName } }
 	end
 end
 function wowClearAura( unit, auraName )
 	if UnitAuras[unit] then
 		for i, aura in pairs( UnitAuras[unit] ) do
-			for aname in pairs( aura ) do
-				if (aname == auraName) then
-					UnitAuras[unit][i] = nil
-				end
+			if( aura.name == auraName ) then
+				UnitAuras[unit][i] = nil
 			end
 		end
 		if (#UnitAuras[unit] == 0) then
@@ -683,33 +681,6 @@ function GetCurrencyListSize()
 	-- @TODO
 	return #Currencies
 end
-function GetEquipmentSetItemIDs( setName )
-	-- http://wowprogramming.com/docs/api/GetEquipmentSetItemIDs
-	-- Returns a table of item IDs keyed by slotID of items in the equipmentSet
-	for _, set in pairs(EquipmentSets) do
-		if setName == set.name then
-			return set.items
-		end
-	end
-end
-function GetEquipmentSetInfo( index )
-	-- http://www.wowwiki.com/API_GetEquipmentSetInfo
-	-- Returns: name, icon, lessIndex = GetEquipmentSetInfo(index)
-	-- Returns: nill if no equipmentSet at that index
-	-- lessIndex is index-1 ( not used )
-	if EquipmentSets[index] then
-		return EquipmentSets[index].name, EquipmentSets[index].icon, index-1
-	end
-end
-function GetEquipmentSetInfoByName( nameIn )
-	-- http://www.wowwiki.com/API_GetEquipmentSetInfo
-	-- Returns: icon, lessIndex = GetEquipmentSetInfoByName
-	for i = 1, #EquipmentSets do
-		if EquipmentSets[i].name == nameIn then  -- Since EquipementSet names are case sensitve...
-			return EquipmentSets[i].icon, i-1
-		end
-	end
-end
 function GetFactionInfo( index )
 	-- http://wowprogramming.com/docs/api/GetFactionInfo
 	local f = FactionInfo[ index ]
@@ -858,11 +829,7 @@ Returns:
 ]]
 	return "Dwarf", "", 384, 0, 100, 200
 end
-function GetNumEquipmentSets()
-	-- http://www.wowwiki.com/API_GetNumEquipmentSets
-	-- Returns 0,MAX_NUM_EQUIPMENT_SETS
-	return #EquipmentSets
-end
+
 function GetNumFactions()
 	-- returns number of factions
 	-- I believe that this should return the correct number that are SHOWN.
@@ -1142,17 +1109,15 @@ function TaxiNodeGetType( nodeId )
 	-- http://www.wowwiki.com/API_TaxiNodeGetType
 	return TaxiNodes[nodeId].type
 end
-function UnitAura( unit, auraName )
+function UnitAura( unit, index, filter )
 	-- @TODO: Look this up to get a better idea of what this function does.
-	-- Returns True or nil
+	-- Returns the aura name
+	-- unit, [index] [,filter]
 	if (UnitAuras[unit]) then
-		for i, auras in pairs(UnitAuras[unit]) do
-			if auras[auraName] then
-				return true
-			end
+		if( UnitAuras[unit][index] ) then
+			return UnitAuras[unit][index].name
 		end
 	end
-	--print("UnitAura did not find "..auraName)
 end
 function UnitClass( who )
 	local unitClasses = {
@@ -1247,6 +1212,41 @@ function C_TradeSkillUI.GetRecipeTools( recipeID )
 	--name : string
 	--has : boolean
 end
+----------
+C_EquipmentSet = {}
+function C_EquipmentSet.GetNumEquipmentSets()
+	-- http://www.wowwiki.com/API_GetNumEquipmentSets
+	-- Returns 0,MAX_NUM_EQUIPMENT_SETS
+	return #EquipmentSets
+end
+function C_EquipmentSet.GetEquipmentSetInfo( index )
+	-- http://www.wowwiki.com/API_GetEquipmentSetInfo
+	-- Returns: name, icon, lessIndex = GetEquipmentSetInfo(index)
+	-- Returns: nill if no equipmentSet at that index
+	-- lessIndex is index-1 ( not used )
+	if EquipmentSets[index] then
+		return EquipmentSets[index].name, EquipmentSets[index].icon, index-1
+	end
+end
+function C_EquipmentSet.GetItemIDs( index )
+	-- http://wowprogramming.com/docs/api/GetEquipmentSetItemIDs
+	-- Returns a table of item IDs keyed by slotID of items in the equipmentSet
+	if EquipmentSets[index] then
+		return EquipmentSets[index].items
+	end
+end
+function GetEquipmentSetInfoByName( nameIn )
+	-- http://www.wowwiki.com/API_GetEquipmentSetInfo
+	-- Returns: icon, lessIndex = GetEquipmentSetInfoByName
+	for i = 1, #EquipmentSets do
+		if EquipmentSets[i].name == nameIn then  -- Since EquipementSet names are case sensitve...
+			return EquipmentSets[i].icon, i-1
+		end
+	end
+end
+
+
+
 --http://wow.gamepedia.com/Patch_7.0.3/API_changes
 
 --/script for k,v in pairs(C_TradeSkillUI.GetAllRecipeIDs()) do print(k..":"..v) end
