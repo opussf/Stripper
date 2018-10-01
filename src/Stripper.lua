@@ -144,13 +144,29 @@ end
 function Stripper.getFreeBag()
 	-- http://www.wowwiki.com/BagId
 	-- bags are 0 based, right to left.  0 = backpack
-	local freeid, typeid
+	local freeSlots, typeid, firstFreeBag, firstFreeEquipmentBag
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
-		freeid, typeid = GetContainerNumFreeSlots(bagid)
-		if freeid > 0 and typeid == 0 then
-			return bagid
+		freeSlots, typeid = GetContainerNumFreeSlots(bagid)
+		isEquipmentBag = GetBagSlotFlag( bagid, LE_BAG_FILTER_FLAG_EQUIPMENT )
+		--print( "bag: "..bagid.." isType: "..typeid.." free: "..freeSlots.." isEquipmentBag: "..( isEquipmentBag and "True" or "False" ) )
+		if( typeid == 0 ) then  -- 0 = no special bag type ( Herb, mine, fishing, etc... )
+			if( not firstFreeBag ) then
+				firstFreeBag = ( not isEquipmentBag and freeSlots > 0 ) and bagid
+			end
+			if( not firstFreeEquipmentBag ) then
+				firstFreeEquipmentBag = ( isEquipmentBag and freeSlots > 0 ) and bagid
+			end
 		end
 	end
+	if( firstFreeEquipmentBag and firstFreeEquipmentBag >= 0 ) then
+		--print( "returning firstFreeEquipmentBag: "..firstFreeEquipmentBag )
+		return firstFreeEquipmentBag
+	end
+	if( firstFreeBag and firstFreeBag >=0 ) then
+		--print( "returning firstFreeBag: "..firstFreeBag )
+		return firstFreeBag
+	end
+
 end
 function Stripper.getItemToRemove()
 	-- Finds the first item in the list of slots

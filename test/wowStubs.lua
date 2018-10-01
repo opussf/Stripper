@@ -661,6 +661,10 @@ function GetContainerNumSlots( bagId )
 		return 0
 	end
 end
+function GetBagSlotFlag( bagId, filterFlagCheck )
+	-- returns true if the filterFlagCheck matches the bag's filterFlag
+	return true
+end
 function GetCurrencyInfo( id ) -- id is integer, currencyLink, currencyString
 	-- integer, link, "currency:###"
 	-- http://wowprogramming.com/docs/api/GetCurrencyInfo
