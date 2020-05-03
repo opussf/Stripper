@@ -28,12 +28,12 @@ Stripper.slotListRemove = {
 		"SecondaryHandSlot", "MainHandSlot"
 }
 Stripper.slotListAdd = {
+		"MainHandSlot", "SecondaryHandSlot",
 		"Trinket0Slot", "Trinket1Slot", "Finger0Slot",
 		"Finger1Slot", "NeckSlot", "BackSlot",
 		"WristSlot", "WaistSlot", "HandsSlot",
 		"FeetSlot", "ShoulderSlot", "HeadSlot",
 		"LegsSlot", "ShirtSlot", "ChestSlot",
-		"MainHandSlot", "SecondaryHandSlot"
 }
 Stripper.setWaitTime = 5
 
@@ -166,7 +166,6 @@ function Stripper.getFreeBag()
 		--print( "returning firstFreeBag: "..firstFreeBag )
 		return firstFreeBag
 	end
-
 end
 function Stripper.getItemToRemove()
 	-- Finds the first item in the list of slots
@@ -322,7 +321,17 @@ function Stripper.Command( msg )
 			Stripper.setWaitTime = tonumber(param) or 5
 			Stripper.targetSet = setName
 			Stripper.Print("Set targetSet to "..Stripper.targetSet);
-			Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
+			local setItemArray = C_EquipmentSet.GetItemIDs( setNum )
+			local setIgnoredSlots = C_EquipmentSet.GetIgnoredSlots( setNum )
+
+			for slot = 1, 19 do
+				local itemId = GetInventoryItemID( "player", slot )   -- nil means no current item
+				if( setIgnoredSlots[slot] and itemId ) then -- slot is ignored, and there is an item
+					setItemArray[slot] = itemId
+				end
+			end
+			Stripper.targetSetItemArray = setItemArray
+			--Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
 			Stripper.AddOne();
 		else
 			Stripper.commandList.remove.func()
