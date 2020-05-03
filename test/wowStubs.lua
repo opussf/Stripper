@@ -14,6 +14,11 @@ actionLog = {
 -- append actions to the log to track actions that may not have an other sideeffects.
 -- record the function calls
 -- [1] = "DoEmote(....)""
+chatLog = {
+-- append chat output here
+-- [1] = { ["msg"] = "ChatOutput", ["channel"] = "where", [<other parameters>] = <values> }
+}
+
 
 
 local itemDB = {
@@ -274,6 +279,7 @@ min = math.min
 abs = math.abs
 random = math.random
 tinsert = table.insert
+unpack = table.unpack
 
 bit = {}
 function bit.lshift( x, by )
@@ -1351,8 +1357,14 @@ function SendChatMessage( msg, chatType, language, channel )
 	-- http://www.wowwiki.com/API_SendChatMessage
 	-- This could simulate sending text to the channel, in the language, and raise the correct event.
 	-- returns nil
+	-- append the parameters to chatLog
 	-- @TODO: Expand this
-	print( string.format( "%s: %s", chatType, msg ) )
+
+	table.insert( chatLog,
+			{ ["msg"] = msg, ["chatType"] = chatType, ["language"] = language, ["channel"] = channel }
+	)
+
+	--print( string.format( "%s: %s", chatType, msg ) )
 end
 function SetAchievementComparisonUnit( lookupStr )
 	-- mostly does nothing...  Just allows INSPECT_ACHIEVEMENT_READY to happen,
@@ -1363,7 +1375,9 @@ function ClearAchievementComparisonUnit()
 	-- mostly does nothing...
 end
 function BNSendWhisper( id, msg )
-	-- @TODO: Expand this
+	table.insert( chatLog,
+			{ ["msg"] = msg, ["chatType"] = "BNWhisper", ["language"] = "", ["channel"] = "BNWhisper" }
+	)
 end
 function TaxiNodeCost( nodeId )
 	-- http://www.wowwiki.com/API_TaxiNodeCost
@@ -1531,4 +1545,48 @@ end
 
 function IsQuestFlaggedCompleted( questID )
 	return nil
+end
+-- C_MountJournal
+C_MountJournal = {}
+C_MountJournal.critters = { ["mount"] = {}, ["critter"] = {} }
+
+function C_MountJournal.GetMountIDs( )
+	return {}
+end
+
+-----------------------------------------
+-- TOC functions
+addonData = {}
+function ParseTOC( tocFile )
+	-- parse the TOC file for ## entries, and lua files to include
+	-- put ## entries in addonData hash - normally hard coded
+	-- require found lua files.
+	local tocFileTable = {}
+	local f = io.open( tocFile, "r" )
+	local tocContents = f:read( "*all" )
+	while true do
+		local linestart, lineend, line = string.find( tocContents, "(.-)\n" )
+		if linestart then
+			local lua, luaEnd, luaFile = string.find( line, "([%a]*)%.lua" )
+			local hash, hashEnd, hashKey, hashValue = string.find( line, "## ([%a]*): (.*)" )
+			if( hash ) then
+				addonData[ hashKey ] = hashValue
+			end
+			if( lua ) then
+				table.insert( tocFileTable, luaFile )
+			end
+			tocContents = string.sub( tocContents, lineend+1 )
+		else
+			break
+		end
+	end
+	pathSeparator = string.sub(package.config, 1, 1) -- first character of this string (http://www.lua.org/manual/5.2/manual.html#pdf-package.config)
+	includePath = tocFile
+	while( string.sub( includePath, -1, -1 ) ~= pathSeparator ) do
+		includePath = string.sub( includePath, 1, -2 )
+	end
+	package.path = includePath.."?.lua;" .. package.path
+	for _,f in pairs( tocFileTable ) do
+		require( f )
+	end
 end
