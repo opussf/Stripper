@@ -99,22 +99,17 @@ function Stripper.ADDON_LOADED( _, arg1 )
 	end
 end
 function Stripper.PLAYER_REGEN_ENABLED()
-	--Stripper.Print("Out of combat");
 	Stripper.clearIsBusy( Stripper.bitFields.combat )
-	--Stripper.isBusy = nil;
 	Stripper.OnUpdate()
 end
 function Stripper.PLAYER_REGEN_DISABLED()
-	--Stripper.Print("In combat");
 	Stripper.setIsBusy( Stripper.bitFields.combat )
-	--Stripper.isBusy = true;
 end
 function Stripper.PET_BATTLE_OPENING_START()
-	Stripper.Print("In pet battle")
 	Stripper.setIsBusy( Stripper.bitFields.petbattle )
 end
 function Stripper.PET_BATTLE_CLOSE()
-	Stripper.setIsBusy( Stripper.bitFields.petbattle )
+	Stripper.clearIsBusy( Stripper.bitFields.petbattle )
 	Stripper.OnUpdate()
 end
 function Stripper.UNIT_AURA( arg1 )
@@ -140,9 +135,9 @@ end
 function Stripper.OnUpdate()
 	if (not Stripper.isBusy) then
 		if Stripper.removeLater then
-			Stripper.RemoveOne();
+			Stripper.RemoveOne()
 		elseif Stripper.addLater and Stripper.addLater <= time() then
-			Stripper.AddOne();
+			Stripper.AddOne()
 		end
 	end
 	if Stripper.targetSet then
