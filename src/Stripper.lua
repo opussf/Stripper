@@ -1,5 +1,7 @@
-STRIPPER_MSG_VERSION = GetAddOnMetadata("Stripper","Version");
-STRIPPER_MSG_ADDONNAME = "Stripper";
+STRIPPER_SLUG, Stripper = ...
+STRIPPER_MSG_ADDONNAME = GetAddOnMetadata( STRIPPER_SLUG, "Title" )
+STRIPPER_MSG_AUTHOR    = GetAddOnMetadata( STRIPPER_SLUG, "Author" )
+STRIPPER_MSG_VERSION   = GetAddOnMetadata( STRIPPER_SLUG, "Version" )
 
 -- Colours
 COLOR_RED = "|cffff0000";
@@ -13,7 +15,6 @@ COLOR_GOLD = "|cffcfb52b";
 COLOR_NEON_BLUE = "|cff4d4dff";
 COLOR_END = "|r";
 
-Stripper = {};
 Stripper.slotListMap={
 		"HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","WaistSlot","LegsSlot",
 		"FeetSlot", "WristSlot", "HandsSlot", "Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot",
@@ -88,9 +89,11 @@ function Stripper.OnLoad()
 	SLASH_STRIPPER3 = "/mm";
 	SlashCmdList["STRIPPER"] = function(msg) Stripper.Command(msg); end
 end
-function Stripper.ADDON_LOADED()
-	Stripper.Print("Stripper loaded")
-	StripperFrame:UnregisterEvent("ADDON_LOADED")
+function Stripper.ADDON_LOADED( _, arg1 )
+	if( arg1 == STRIPPER_SLUG ) then
+		Stripper.Print( STRIPPER_MSG_VERSION.." loaded" )
+		StripperFrame:UnregisterEvent("ADDON_LOADED")
+	end
 end
 function Stripper.PLAYER_REGEN_ENABLED()
 	--Stripper.Print("Out of combat");

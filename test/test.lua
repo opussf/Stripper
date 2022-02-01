@@ -1,8 +1,5 @@
 #!/usr/bin/env lua
 
-addonData = { ["Version"] = "1.0",
-}
-
 require "wowTest"
 
 --test.outFileName = "../dest/testOut.xml"
@@ -12,8 +9,7 @@ StripperFrame = Frame
 Stripper_TimerBar = CreateStatusBar()
 
 -- require the file to test
-package.path = "../src/?.lua;'" .. package.path
-require "Stripper"
+ParseTOC( "../src/Stripper.toc" )
 
 function test.before()
 	Stripper.OnLoad()

@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  $Date:$
--- Revision:  @VERSION@
+-- Date    :  January 8 2022
+-- Revision:  9.0.2
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -9,6 +9,8 @@
 -- This is not intended to replace WoWBench, but to provide a stub structure for
 --     automated unit tests.
 
+settings = {
+}
 actionLog = {
 }
 -- append actions to the log to track actions that may not have an other sideeffects.
@@ -18,8 +20,6 @@ chatLog = {
 -- append chat output here
 -- [1] = { ["msg"] = "ChatOutput", ["channel"] = "where", [<other parameters>] = <values> }
 }
-
-
 
 local itemDB = {
 }
@@ -110,14 +110,14 @@ TaxiNodes = {
 	{["name"] = "Ironforge", ["type"] = "NONE", ["hops"] = 1, ["cost"]=1000},
 }
 Currencies = {
-	["1"] = { ["name"] = "Currency Token Test Token 4", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = false, ["link"] = "|cffffffff|Hcurrency:1|h[Currency Token Test Token 4]|h|r"},
-	["384"] = { ["name"] = "Dwarf Archaeology Fragment", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 200, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:384:0:0:0:0:0:0:0:80:0:0|h[Dwarf Archaeology Fragment]|h|r"},
-	["390"] = { ["name"] = "Conquest", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["392"] = { ["name"] = "Honor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["395"] = { ["name"] = "Justice",  ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["396"] = { ["name"] = "Valor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["402"] = { ["name"] = "Ironpaw Token", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:402:0:0:0:0:0:0:0:80:0:0|h[Ironpaw Token]|h|r"},
-	["703"] = { ["name"] = "Fictional Currency", ["texturePath"] = "", ["weeklyMax"] = 1000, ["totalMax"] = 4000, isDiscovered = true, ["link"] = "|cffffffff|Hcurrency:703|h[Fictional Currency]|h|r"},
+	[1] = { ["name"] = "Currency Token Test Token 4", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = false, ["link"] = "|cffffffff|Hcurrency:1|h[Currency Token Test Token 4]|h|r"},
+	[384] = { ["name"] = "Dwarf Archaeology Fragment", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 200, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:384:0:0:0:0:0:0:0:80:0:0|h[Dwarf Archaeology Fragment]|h|r"},
+	[390] = { ["name"] = "Conquest", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[392] = { ["name"] = "Honor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[395] = { ["name"] = "Justice",  ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[396] = { ["name"] = "Valor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[402] = { ["name"] = "Ironpaw Token", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:402:0:0:0:0:0:0:0:80:0:0|h[Ironpaw Token]|h|r"},
+	[703] = { ["name"] = "Fictional Currency", ["texturePath"] = "", ["weeklyMax"] = 1000, ["totalMax"] = 4000, isDiscovered = true, ["link"] = "|cffffffff|Hcurrency:703|h[Fictional Currency]|h|r"},
 }
 ArchaeologyCurrencies = {"999",}
 MerchantInventory = {
@@ -128,7 +128,7 @@ MerchantInventory = {
 	{["id"] = "49927", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
 		["currencies"] = {{["id"] = "49916", ["type"] = "item", ["quantity"] = 1},}},  -- Lovely Charm Bracelet
 	{["id"] = "74661", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
-		["currencies"] = {{["id"] = "402", ["type"] = "currency", ["quantity"] = 1},}},
+		["currencies"] = {{["id"] = 402, ["type"] = "currency", ["quantity"] = 1},}},
 	{["id"] = "85216", ["cost"] = 2500, ["quantity"] = 1, ["isUsable"] = nil},
 }
 TradeSkillItems = {
@@ -212,6 +212,8 @@ globals.FACTION_STANDING_LABEL5 = "Friendly"
 globals.FACTION_STANDING_LABEL6 = "Honored"
 globals.FACTION_STANDING_LABEL7 = "Revered"
 globals.FACTION_STANDING_LABEL8 = "Exalted"
+
+COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = 8
 
 --			TT.fName, TT.fDescription, TT.fStandingId, TT.fBottomValue, TT.fTopValue, TT.fEarnedValue, TT.fAtWarWith,
 --					TT.fCanToggleAtWar, TT.fIsHeader, TT.fIsCollapsed, TT.fIsWatched, TT.isChild, TT.factionID,
@@ -381,8 +383,12 @@ Frame = {
 		["UnregisterEvent"] = function(self, event) self.Events[event] = nil; end,
 		["GetName"] = function(self) return self.framename end,
 		["SetFrameStrata"] = function() end,
+		["width"] = 100,
+		["height"] = 100,
 		["SetWidth"] = function(self, value) self.width = value; end,
+		["GetWidth"] = function(self) return( self.width ); end,
 		["SetHeight"] = function(self, value) self.height = value; end,
+		["GetHeight"] = function(self) return( self.height ); end,
 		["CreateFontString"] = function(self, ...) return(CreateFontString(...)) end,
 
 		["SetMinMaxValues"] = function() end,
@@ -730,6 +736,9 @@ function GetAchievementNumCriteria( achievementID )
 		return #Achievements[achievementID]["criteria"]
 	end
 end
+function GetSpecialization()
+	return 2
+end
 function GetStatistic( statID )
 	-- https://wow.gamepedia.com/API_GetStatistic
 
@@ -803,26 +812,6 @@ end
 function GetBagSlotFlag( bagId, filterFlagCheck )
 	-- returns true if the filterFlagCheck matches the bag's filterFlag
 	return true
-end
-function GetCurrencyInfo( id ) -- id is integer, currencyLink, currencyString
-	-- integer, link, "currency:###"
-	-- http://wowprogramming.com/docs/api/GetCurrencyInfo
-	-- returns name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered
-	id = tostring(id)
-	if Currencies[id] then
-		local c = Currencies[id]
-		return c["name"], (myCurrencies[id] or 0), "", 0, c["weeklyMax"], c["totalMax"], true
-	end
-end
-function GetCurrencyLink( id )
-	id = tostring(id)
-	if Currencies[id] then
-		return Currencies[id].link
-	end
-end
-function GetCurrencyListSize()
-	-- @TODO
-	return #Currencies
 end
 function GetEquipmentSetItemIDs( setName )
 	-- http://wowprogramming.com/docs/api/GetEquipmentSetItemIDs
@@ -1030,6 +1019,10 @@ function GetNumEquipmentSets()
 	-- Returns 0,MAX_NUM_EQUIPMENT_SETS
 	return #EquipmentSets
 end
+function GetRepairAllCost()
+	-- Returns cost to repair all, and if can repair
+	return 5000, true  -- 50s and yes
+end
 function GetNumFactions()
 	-- returns number of factions
 	-- I believe that this should return the correct number that are SHOWN.
@@ -1052,6 +1045,10 @@ function GetNumRoutes( nodeId )
 	-- http://wowprogramming.com/docs/api/GetNumRoutes
 	-- returns numHops
 	return TaxiNodes[nodeId].hops
+end
+function GetNumSavedInstances()
+	-- @TODO: Research this
+	return 0
 end
 -- GetNumTradeSkills is deprecated
 --function GetNumTradeSkills( )
@@ -1295,6 +1292,9 @@ function RegisterAddonMessagePrefix( prefix )
 	-- Cannot be empty.
 	-- What does this do?  In a bigger system, it could allow random messages to be generated
 end
+function RepairAllItems( useGuild )
+	-- performs rapir, uses guild money if useGuild is true
+end
 function RequestTimePlayed()
 end
 function Screenshot( )
@@ -1374,6 +1374,9 @@ end
 function ClearAchievementComparisonUnit()
 	-- mostly does nothing...
 end
+function SetRaidTarget( target, iconID )
+	-- sets the raid icon ID on target
+end
 function BNSendWhisper( id, msg )
 	table.insert( chatLog,
 			{ ["msg"] = msg, ["chatType"] = "BNWhisper", ["language"] = "", ["channel"] = "BNWhisper" }
@@ -1391,6 +1394,12 @@ function TaxiNodeGetType( nodeId )
 	-- http://www.wowwiki.com/API_TaxiNodeGetType
 	return TaxiNodes[nodeId].type
 end
+function setUnitOnTaxi( valueIn )
+	settings.unitOnTaxi = valueIn
+end
+function UnitOnTaxi()
+	return settings.unitOnTaxi or false
+end
 function UnitAffectingCombat( unit )
 	return false
 end
@@ -1406,6 +1415,9 @@ end
 function UnitClass( who )
 	return Units[who].class
 end
+function UnitGUID( who )
+	return "playerGUID"
+end
 function UnitHealthMax( who )
 	-- http://wowwiki.wikia.com/wiki/API_UnitHealth
 	return Units[who].maxHealth
@@ -1415,7 +1427,8 @@ function UnitFactionGroup( who )
 	return unpack( Units[who].faction )
 end
 function UnitIsDeadOrGhost( who )
-
+end
+function UnitIsPVP( who )
 end
 function UnitLevel( who )
 	local unitLevels = {
@@ -1543,6 +1556,14 @@ end
 
 ----------
 
+----------
+C_AuctionHouse = {}
+function C_AuctionHouse.PostItem( item, duration, quantity, bid, buyout )
+end
+function C_AuctionHouse.PostCommodity( item, duration, quantity, price )
+end
+
+
 function IsQuestFlaggedCompleted( questID )
 	return nil
 end
@@ -1554,39 +1575,103 @@ function C_MountJournal.GetMountIDs( )
 	return {}
 end
 
+----------
+-- C_CurrencyInfo
+----------
+C_CurrencyInfo = {}
+function C_CurrencyInfo.GetCurrencyInfo( id ) -- id is integet
+	-- returns a table:
+	-- 		localName, isHeader, isHeaderExpanded, isTypeUnused, isShowInBackpack, quantity, iconFileID, maxQuantity,
+	--      canEarnPerWeek, quantityEarnedThisWeek, isTradeable, quality, maxWeeklyQuantity, discovered
+	local ci = Currencies[id]
+	if ci then
+		return { ["localName"]=ci.name, ["isHeader"]=false, ["isHeaderExpanded"]=false, ["isTypeUnused"]=false,
+				["isShowInBackpack"]=false, ["quantity"]=(myCurrencies[id] or 0), ["discovered"] = ci.isDiscovered,
+				["canEarnPerWeek"]=ci.weeklyMax, ["maxQuantity"]=ci.totalMax, ["quantityEarnedThisWeek"]=0 }
+				-- @TODO: fix the quantityEarnedThisWeek to come from myCurrencies
+	end
+end
+function C_CurrencyInfo.GetCurrencyLink( id )
+	if Currencies[id] then
+		return Currencies[id].link
+	end
+end
+
 -----------------------------------------
 -- TOC functions
 addonData = {}
-function ParseTOC( tocFile )
+function ParseTOC( tocFile, useRequire )
 	-- parse the TOC file for ## entries, and lua files to include
 	-- put ## entries in addonData hash - normally hard coded
-	-- require found lua files.
+	-- set useRequire to use the old require method
 	local tocFileTable = {}
 	local f = io.open( tocFile, "r" )
-	local tocContents = f:read( "*all" )
-	while true do
-		local linestart, lineend, line = string.find( tocContents, "(.-)\n" )
-		if linestart then
-			local lua, luaEnd, luaFile = string.find( line, "([%a]*)%.lua" )
-			local hash, hashEnd, hashKey, hashValue = string.find( line, "## ([%a]*): (.*)" )
-			if( hash ) then
-				addonData[ hashKey ] = hashValue
+	if f then
+		local tocContents = f:read( "*all" )
+		while true do
+			local linestart, lineend, line = string.find( tocContents, "(.-)\n" )
+			if linestart then
+				local lua, luaEnd, luaFile = string.find( line, "([%a]*)%.lua" )
+				local xml, xmlEnd, xmlFile = string.find( line, "([%a]*)%.xml" )
+				local hash, hashEnd, hashKey, hashValue = string.find( line, "## ([%a]*): (.*)" )
+				if( hash ) then
+					addonData[ hashKey ] = hashValue
+				elseif( lua ) then
+					table.insert( tocFileTable, luaFile )
+				end
+				tocContents = string.sub( tocContents, lineend+1 )
+			else
+				break
 			end
-			if( lua ) then
-				table.insert( tocFileTable, luaFile )
+		end
+		pathSeparator = string.sub(package.config, 1, 1)
+		-- first character of this string (http://www.lua.org/manual/5.2/manual.html#pdf-package.config)
+		includePath = tocFile
+		while( string.sub( includePath, -1, -1 ) ~= pathSeparator ) do
+			includePath = string.sub( includePath, 1, -2 )
+		end
+		addonName = string.sub( tocFile, string.len( includePath ) + 1, -5 )
+
+		if( useRequire ) then
+			--add to the include package.path
+			package.path = includePath.."?.lua;" .. package.path
+		end
+
+		sharedTable = {}
+
+		for _,f in pairs( tocFileTable ) do
+			if( useRequire ) then
+				require( f )
+			else
+				local loadedfile = assert( loadfile( includePath..f..".lua" ) )
+				loadedfile( addonName, sharedTable )
 			end
-			tocContents = string.sub( tocContents, lineend+1 )
-		else
-			break
 		end
 	end
-	pathSeparator = string.sub(package.config, 1, 1) -- first character of this string (http://www.lua.org/manual/5.2/manual.html#pdf-package.config)
-	includePath = tocFile
-	while( string.sub( includePath, -1, -1 ) ~= pathSeparator ) do
-		includePath = string.sub( includePath, 1, -2 )
-	end
-	package.path = includePath.."?.lua;" .. package.path
-	for _,f in pairs( tocFileTable ) do
-		require( f )
-	end
 end
+
+
+
+---   https://wowwiki.fandom.com/wiki/AddOn_loading_process
+--[[ Load event order:
+
+After the addon code has been loaded, the loading process can be followed by registering for various events, listed here in order of firing.
+
+    ADDON_LOADED
+        This event fires whenever an AddOn has finished loading and the SavedVariables for that AddOn have been loaded from their file.
+    SPELLS_CHANGED
+        This event fires shortly before the PLAYER_LOGIN event and signals that information on the user's spells has been loaded and is available to the UI.
+    PLAYER_LOGIN
+        This event fires immediately before PLAYER_ENTERING_WORLD.
+        Most information about the game world should now be available to the UI.
+        All Sizing and Positioning of frames is supposed to be completed before this event fires.
+        AddOns that want to do one-time initialization procedures once the player has "entered the world" should use this event instead of PLAYER_ENTERING_WORLD.
+    PLAYER_ENTERING_WORLD
+        This event fires immediately after PLAYER_LOGIN
+        Most information about the game world should now be available to the UI. If this is an interface reload rather than a fresh log in, talent information should also be available.
+        All Sizing and Positioning of frames is supposed to be completed before this event fires.
+        This event also fires whenever the player enters/leaves an instance and generally whenever the player sees a loading screen
+    PLAYER_ALIVE
+        This event fires after PLAYER_ENTERING_WORLD
+        Quest and Talent information should now be available to the UI
+]]
