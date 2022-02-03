@@ -110,7 +110,7 @@ function Stripper.PET_BATTLE_OPENING_START()
 end
 function Stripper.PET_BATTLE_CLOSE()
 	Stripper.clearIsBusy( Stripper.bitFields.petbattle )
-	Stripper.addLater = time() + 2
+	if Stripper.addLater then Stripper.addLater = time() + 2 end
 	Stripper.OnUpdate()
 end
 function Stripper.UNIT_AURA( arg1 )
