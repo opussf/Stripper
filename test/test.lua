@@ -19,6 +19,7 @@ function test.before()
 	Stripper.isBusy = nil
 	Stripper.targetSet = nil
 	Stripper.targetSetItemArray = nil
+	Stripper.addLater = nil
 end
 function test.after()
 	myGear = {}
@@ -26,6 +27,16 @@ end
 function test.testOnLoad()
 	-- This may seem noop, but it tests that the OnLoad throws no errors
 	assertTrue( SlashCmdList["STRIPPER"] )
+end
+function test.testPlayerIsBusy_StartsPetBattle()
+	Stripper.PET_BATTLE_OPENING_START()
+	assertTrue( Stripper.isBusy )
+	Stripper.PET_BATTLE_CLOSE()
+end
+function test.testPlayerIsBusy_EndsPetBattle()
+	Stripper.PET_BATTLE_OPENING_START()
+	Stripper.PET_BATTLE_CLOSE()
+	assertIsNil( Stripper.isBusy )
 end
 function test.testPlayerIsBusy_EntersCombat()
 	-- @TODO: Fix this
@@ -82,7 +93,7 @@ function test.testGetFreeBag_HasNoSpace()
 	local bagId = Stripper.getFreeBag()
 	assertIsNil( bagId, "Should be nil")
 end
-function test.testCommand_EquipSet_useTestSet_equipItem()
+function test.notestCommand_EquipSet_useTestSet_equipItem()
 	myGear = {} -- Naked
 	Stripper.Command("testSet")
 	assertEquals( "113596", myGear[1], "Item should have been equipped.")
