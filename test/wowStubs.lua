@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  January 8 2022
--- Revision:  9.0.2
+-- Date    :  February 26 2022
+-- Revision:  9.0.2-1-g8df9344
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -396,6 +396,9 @@ Frame = {
 		["SetStatusBarColor"] = function() end,
 		["SetScript"] = function() end,
 		["SetAttribute"] = function() end,
+
+		["SetChecked"] = function() end,
+		["SetText"] = function() end,
 }
 FrameGameTooltip = {
 		["HookScript"] = function( self, callback ) end,

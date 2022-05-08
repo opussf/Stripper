@@ -1,5 +1,5 @@
+## Title: Stripper v@VERSION@
 ## Interface: @INTERFACE@
-## Title: Stripper
 ## Notes: Provides for a command to slowly remove gear @VERSION@
 ## Author: sistersally of hyjal
 ## Version: @VERSION@
