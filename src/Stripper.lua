@@ -157,7 +157,8 @@ function Stripper.getFreeBag()
 	local freeSlots, typeid, firstFreeBag, firstFreeEquipmentBag
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
 		freeSlots, typeid = GetContainerNumFreeSlots(bagid)
-		isEquipmentBag = GetBagSlotFlag( bagid, LE_BAG_FILTER_FLAG_EQUIPMENT )
+		--isEquipmentBag = GetBagSlotFlag( bagid, LE_BAG_FILTER_FLAG_EQUIPMENT )
+		isEquipmentBag = true    -- @TODO:   figure this shit out again.
 		--print( "bag: "..bagid.." isType: "..typeid.." free: "..freeSlots.." isEquipmentBag: "..( isEquipmentBag and "True" or "False" ) )
 		if( typeid == 0 ) then  -- 0 = no special bag type ( Herb, mine, fishing, etc... )
 			if( not firstFreeBag ) then

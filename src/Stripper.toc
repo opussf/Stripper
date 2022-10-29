@@ -1,5 +1,5 @@
 ## Title: Stripper
-## Notes: Provides for a command to slowly remove gear (v@VERSION@)
+## Notes: Provides for a command to slowly remove gear (@VERSION@)
 ## Interface: @INTERFACE@
 ## Author: opussf
 ## Version: @VERSION@

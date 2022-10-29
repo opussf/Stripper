@@ -25,7 +25,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="LOW">
-						<FontString name="Stripper_TimerBarText" inherits="GameFontNormal" wraponspaces="false">
+						<FontString name="Stripper_TimerBarText" inherits="GameFontNormal">
 							<Anchors>
 								<Anchor point="CENTER">
 								</Anchor>
