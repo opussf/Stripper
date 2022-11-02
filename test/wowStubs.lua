@@ -812,7 +812,8 @@ function GetContainerNumSlots( bagId )
 		return 0
 	end
 end
-function GetBagSlotFlag( bagId, filterFlagCheck )
+C_Container = {}
+function C_Container.GetBagSlotFlag( bagId, filterFlagCheck )
 	-- returns true if the filterFlagCheck matches the bag's filterFlag
 	return true
 end
@@ -1185,6 +1186,8 @@ function IsInRaid()
 	-- 1, nill boolean return of being in raid
 	-- myParty = { ["group"] = nil, ["raid"] = nil } -- set one of these to true to reflect being in group or raid.
 	return ( myParty["raid"] and 1 or nil )
+end
+function GetCursorInfo()
 end
 function GetInstanceInfo()
 	-- https://wowwiki.fandom.com/wiki/API_GetInstanceInfo

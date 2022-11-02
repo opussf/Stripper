@@ -157,9 +157,9 @@ function Stripper.getFreeBag()
 	local freeSlots, typeid, firstFreeBag, firstFreeEquipmentBag
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
 		freeSlots, typeid = GetContainerNumFreeSlots(bagid)
-		--isEquipmentBag = GetBagSlotFlag( bagid, LE_BAG_FILTER_FLAG_EQUIPMENT )
-		isEquipmentBag = true    -- @TODO:   figure this shit out again.
-		--print( "bag: "..bagid.." isType: "..typeid.." free: "..freeSlots.." isEquipmentBag: "..( isEquipmentBag and "True" or "False" ) )
+		isEquipmentBag = C_Container.GetBagSlotFlag( bagid, 2 )
+		--isEquipmentBag = true    -- @TODO:   figure this shit out again.
+		--print( "bag: "..bagid.." isType: "..(typeid or "nil").." free: "..freeSlots.." isEquipmentBag: "..( isEquipmentBag and "True" or "False" ) )
 		if( typeid == 0 ) then  -- 0 = no special bag type ( Herb, mine, fishing, etc... )
 			if( not firstFreeBag ) then
 				firstFreeBag = ( not isEquipmentBag and freeSlots > 0 ) and bagid
@@ -169,6 +169,7 @@ function Stripper.getFreeBag()
 			end
 		end
 	end
+	--print( "firstFreeBag: "..(firstFreeBag or "False").." firstEquipmentBag: "..(firstFreeEquipmentBag or "False") )
 	if( firstFreeEquipmentBag and firstFreeEquipmentBag >= 0 ) then
 		--print( "returning firstFreeEquipmentBag: "..firstFreeEquipmentBag )
 		return firstFreeEquipmentBag
@@ -208,7 +209,7 @@ function Stripper.RemoveFromSlot( slotName, report )
 		if freeBagId == 0 then
 			PutItemInBackpack()
 		else
-			PutItemInBag(freeBagId+19)
+			PutItemInBag(freeBagId+30)
 		end
 		return true
 	else
