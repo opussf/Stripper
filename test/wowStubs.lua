@@ -790,19 +790,6 @@ function GetCoinTextureString( copperIn, fontHeight )
 end
 function GetContainerItemLink( bagId, slotId )
 end
-function GetContainerNumFreeSlots( bagId )
-	-- http://www.wowwiki.com/API_GetContainerNumFreeSlots
-	-- http://www.wowwiki.com/BagType
-	-- returns numberOfFreeSlots, BagType
-	-- BagType should be 0
-	-- TODO: For API, what should it return if no bag is equipped?  (it should not be nil it seems)
-	-- ^^ Note, the backpack(0) is ALWAYS equipped.
-	if bagInfo[bagId] then
-		return unpack(bagInfo[bagId])
-	else
-		return 0, 0
-	end
-end
 function GetContainerNumSlots( bagId )
 	-- http://wowwiki.wikia.com/wiki/API_GetContainerNumSlots
 	-- returns the number of slots in the bag, or 0 if no bag
@@ -816,6 +803,19 @@ C_Container = {}
 function C_Container.GetBagSlotFlag( bagId, filterFlagCheck )
 	-- returns true if the filterFlagCheck matches the bag's filterFlag
 	return true
+end
+function C_Container.GetContainerNumFreeSlots( bagId )
+	-- http://www.wowwiki.com/API_GetContainerNumFreeSlots
+	-- http://www.wowwiki.com/BagType
+	-- returns numberOfFreeSlots, BagType
+	-- BagType should be 0
+	-- TODO: For API, what should it return if no bag is equipped?  (it should not be nil it seems)
+	-- ^^ Note, the backpack(0) is ALWAYS equipped.
+	if bagInfo[bagId] then
+		return unpack(bagInfo[bagId])
+	else
+		return 0, 0
+	end
 end
 function GetEquipmentSetItemIDs( setName )
 	-- http://wowprogramming.com/docs/api/GetEquipmentSetItemIDs

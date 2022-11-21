@@ -156,7 +156,7 @@ function Stripper.getFreeBag()
 	-- bags are 0 based, right to left.  0 = backpack
 	local freeSlots, typeid, firstFreeBag, firstFreeEquipmentBag
 	for bagid = NUM_BAG_SLOTS, 0, -1 do
-		freeSlots, typeid = GetContainerNumFreeSlots(bagid)
+		freeSlots, typeid = C_Container.GetContainerNumFreeSlots(bagid)
 		isEquipmentBag = C_Container.GetBagSlotFlag( bagid, 2 )
 		--isEquipmentBag = true    -- @TODO:   figure this shit out again.
 		--print( "bag: "..bagid.." isType: "..(typeid or "nil").." free: "..freeSlots.." isEquipmentBag: "..( isEquipmentBag and "True" or "False" ) )
