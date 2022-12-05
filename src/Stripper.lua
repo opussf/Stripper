@@ -113,14 +113,27 @@ function Stripper.PET_BATTLE_CLOSE()
 	if Stripper.addLater then Stripper.addLater = time() + 2 end
 	Stripper.OnUpdate()
 end
-function Stripper.UNIT_AURA( arg1 )
+function Stripper.UNIT_AURA( arg1, auraTable )  -- auraTable is optional table
 	if (arg1 == "player") then
 		Stripper.clearIsBusy( Stripper.bitFields.fishing )
-		for an = 1,40 do
-			aName = UnitAura( arg1, an )
-			if( aName and aName == "Fishing" ) then
-				Stripper.setIsBusy( Stripper.bitFields.fishing )
-				break
+		if auraTable and auraTable["updatedAuraInstanceIDs"] then
+			for _, auraInstanceID in ipairs( auraTable["updatedAuraInstanceIDs"] ) do
+				if auraInstanceID == 307377 then  -- this seems to be fishing
+					Stripper.setIsBusy( Stripper.bitFields.fishing )
+					break
+				end
+			end
+		end
+		if not Stripper.isBusy then
+			for k,val in pairs( auraTable or {} ) do
+				--print(k)
+				if k == "updatedAuraInstanceIDs" then
+					for _, v in ipairs( val ) do
+						print(v.." is this id important?")
+						name = C_UnitAuras.GetPlayerAuraBySpellID(v)
+						print(name)
+					end
+				end
 			end
 		end
 	end
