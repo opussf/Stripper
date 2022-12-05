@@ -124,18 +124,18 @@ function Stripper.UNIT_AURA( arg1, auraTable )  -- auraTable is optional table
 				end
 			end
 		end
-		if not Stripper.isBusy then
-			for k,val in pairs( auraTable or {} ) do
-				--print(k)
-				if k == "updatedAuraInstanceIDs" then
-					for _, v in ipairs( val ) do
-						print(v.." is this id important?")
-						name = C_UnitAuras.GetPlayerAuraBySpellID(v)
-						print(name)
-					end
-				end
-			end
-		end
+		-- if not Stripper.isBusy then
+		-- 	for k,val in pairs( auraTable or {} ) do
+		-- 		--print(k)
+		-- 		if k == "updatedAuraInstanceIDs" then
+		-- 			for _, v in ipairs( val ) do
+		-- 				print(v.." is this id important?")
+		-- 				name = C_UnitAuras.GetPlayerAuraBySpellID(v)
+		-- 				print(name)
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 	end
 end
 function Stripper.setIsBusy( valIn )
