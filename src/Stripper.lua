@@ -79,7 +79,8 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 	StripperFrame:RegisterEvent("PET_BATTLE_OPENING_START")
 	StripperFrame:RegisterEvent("PET_BATTLE_CLOSE")
-	StripperFrame:RegisterEvent("UNIT_AURA")
+	--StripperFrame:RegisterEvent("UNIT_AURA")
+	StripperFrame:RegisterEvent( "COMBAT_LOG_EVENT_UNFILTERED" )
 
 	-- EQUIPMENT_SWAP_PENDING
 	-- EQUIPMENT_SWAP_FINISHED
@@ -91,6 +92,7 @@ function Stripper.OnLoad()
 	SLASH_STRIPPER2 = "/st";
 	SLASH_STRIPPER3 = "/mm";
 	SlashCmdList["STRIPPER"] = function(msg) Stripper.Command(msg); end
+	Stripper.name = UnitName( "player" )
 end
 function Stripper.ADDON_LOADED( _, arg1 )
 	if( arg1 == STRIPPER_SLUG ) then
@@ -113,31 +115,121 @@ function Stripper.PET_BATTLE_CLOSE()
 	if Stripper.addLater then Stripper.addLater = time() + 2 end
 	Stripper.OnUpdate()
 end
-function Stripper.UNIT_AURA( arg1, auraTable )  -- auraTable is optional table
-	if (arg1 == "player") then
-		Stripper.clearIsBusy( Stripper.bitFields.fishing )
-		if auraTable and auraTable["updatedAuraInstanceIDs"] then
-			for _, auraInstanceID in ipairs( auraTable["updatedAuraInstanceIDs"] ) do
-				if auraInstanceID == 307377 then  -- this seems to be fishing
-					Stripper.setIsBusy( Stripper.bitFields.fishing )
-					break
-				end
-			end
+function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
+	local _, t, _, sourceID, sourceName, sourceFlags, sourceRaidFlags,
+			destID, destName, destFlags, _, spellID, spName, _, ext1, ext2, ext3 = CombatLogGetCurrentEventInfo()
+	if sourceName == Stripper.name and spName == "Fishing" then
+		--print( t, sourceName, spName )
+		if t == "SPELL_AURA_APPLIED" then
+			Stripper.setIsBusy( Stripper.bitFields.fishing )
+		elseif t == "SPELL_AURA_REMOVED" then
+			Stripper.clearIsBusy( Stripper.bitFields.fishing )
 		end
-		-- if not Stripper.isBusy then
-		-- 	for k,val in pairs( auraTable or {} ) do
-		-- 		--print(k)
-		-- 		if k == "updatedAuraInstanceIDs" then
-		-- 			for _, v in ipairs( val ) do
-		-- 				print(v.." is this id important?")
-		-- 				name = C_UnitAuras.GetPlayerAuraBySpellID(v)
-		-- 				print(name)
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
 	end
 end
+-- function Stripper.UNIT_AURA( arg1, auraTable )  -- auraTable is optional table
+-- 	if (arg1 == "player") then
+-- 		tableIDs = {
+-- 			["update"] = "updatedAuraInstanceIDs",
+-- 			["added"] = "addedAuras",
+-- 			["removed"] = "removedAuraInstanceIDs"
+-- 		}
+-- 		if auraTable == nil then
+-- 			return
+-- 		end
+-- 		for k, tableID in pairs( tableIDs ) do
+-- 			if auraTable[tableID] then
+-- 				--print( k.."::"..tableID )
+-- 				auraInfoName = ""
+-- 				for _, auraInstanceID in ipairs( auraTable[tableID] ) do
+-- 					if type(auraInstanceID) == "table" then
+-- 						--print( auraInstanceID.name.."("..auraInstanceID.auraInstanceID..")" )
+-- 						auraInfoName = auraInstanceID.name
+-- 					else
+-- 						auraInfo = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInstanceID)
+-- 						if auraInfo then
+-- 							auraInfoName = auraInfo.name
+-- 						end
+-- 						--print( auraInfoName,"(",auraInstanceID,")" )
+-- 					end
+-- 					if string.find(auraInfoName, "[Ff]ishing" ) then
+-- 						Stripper.setIsBusy( Stripper.bitFields.fishing )
+-- 						Stripper.fishingAura = auraInstanceID
+-- 						StripperFrame:RegisterEvent("LOOT_OPENED")
+-- 					end
+-- 					if ( tableID == "removed" and auraInstanceID == Stripper.fishingAura ) then
+-- 						Stripper.clearIsBusy( Stripper.bitFields.fishing )
+-- 						StripperFrame:UnregisterEvent("LOOT_OPENED")
+-- 					end
+-- 				end
+
+-- 			end
+-- 		end
+
+-- 		-- if auraTable and auraTable["updatedAuraInstanceIDs"] then
+-- 		-- 	for _, auraInstanceID in ipairs( auraTable["updatedAuraInstanceIDs"] ) do
+-- 		-- 		print("Updated")
+-- 		-- 		print(auraInstanceID)
+-- 		-- 		local auraInfoName = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInstanceID).name
+-- 		-- 		print( "Updated: "..auraInfoName )
+-- 		-- 		if string.find( auraInfoName, "[Ff]ishing" ) then -- this seems to be fishing
+-- 		-- 			print("Busy")
+-- 		-- 			Stripper.setIsBusy( Stripper.bitFields.fishing )
+-- 		-- 			break
+-- 		-- 		end
+-- 		-- 	end
+-- 		-- end
+-- 		-- -- if auraTable and auraTable["addedAuras"] then
+-- 		-- -- 	print("Added")
+-- 		-- -- 	for _, auraInstanceID in ipairs( auraTable["addedAuras"] ) do
+-- 		-- -- 		for k,v in pairs( auraInstanceID ) do
+-- 		-- -- 			print(k..":"..v)
+-- 		-- -- 		end
+-- 		-- -- 		print(auraInstanceID)
+-- 		-- -- 		local auraInfoName = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInstanceID).name
+-- 		-- -- 		print( "Added: "..auraInfoName )
+-- 		-- -- 		if string.find( auraInfoName, "[Ff]ishing" ) then -- this seems to be fishing
+-- 		-- -- 			print("Busy")
+-- 		-- -- 			Stripper.setIsBusy( Stripper.bitFields.fishing )
+-- 		-- -- 			break
+-- 		-- -- 		end
+-- 		-- -- 	end
+-- 		-- -- end
+-- 		-- -- if auraTable and auraTable["removedAuraInstanceIDs"] then
+-- 		-- -- 	for k, auraInstanceID in ipairs( auraTable["removedAuraInstanceIDs"] ) do
+-- 		-- -- 		print(k)
+-- 		-- -- 		print(auraInstanceID)
+-- 		-- -- 		local auraInfoName = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInstanceID).name
+-- 		-- -- 		print( "Removed: "..auraInfoName )
+-- 		-- -- 		if string.find( auraInfoName, "[Ff]ishing" ) then -- this seems to be fishing
+-- 		-- -- 			print("Busy")
+-- 		-- 			Stripper.setIsBusy( Stripper.bitFields.fishing )
+-- 		-- 			break
+-- 		-- 		end
+-- 		-- 	end
+-- 		-- end
+-- 		-- print("Cleared")
+-- 		--Stripper.clearIsBusy( Stripper.bitFields.fishing )
+-- 		-- if not Stripper.isBusy then
+-- 		-- 	for k,val in pairs( auraTable or {} ) do
+-- 		-- 		--print(k)
+-- 		-- 		if k == "updatedAuraInstanceIDs" then
+-- 		-- 			for _, v in ipairs( val ) do
+-- 		-- 				print(v.." is this id important?")
+-- 		-- 				name = C_UnitAuras.GetPlayerAuraBySpellID(v)
+-- 		-- 				--C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID)
+-- 		-- 				--print(name)
+-- 		-- 			end
+-- 		-- 		end
+-- 		-- 	end
+-- 		-- end
+-- 	end
+-- end
+-- function Stripper.LOOT_OPENED( arg1 )
+-- 	print("LOOT_OPENED:", arg1)
+-- 	StripperFrame:UnregisterEvent("LOOT_OPENED")
+-- 	Stripper.clearIsBusy( Stripper.bitFields.fishing )
+-- end
 function Stripper.setIsBusy( valIn )
 	Stripper.isBusy = bit.bor( (Stripper.isBusy or 0), valIn )
 end
