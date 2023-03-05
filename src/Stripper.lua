@@ -152,7 +152,13 @@ function Stripper.getFreeBag()
 	-- http://www.wowwiki.com/BagId
 	-- bags are 0 based, right to left.  0 = backpack
 	local freeSlots, typeid, firstFreeBag, firstFreeEquipmentBag
-	for bagid = NUM_BAG_SLOTS, 0, -1 do
+	--C_Container.GetSortBagsRightToLeft() -- normal is false
+	-- use sort order to decide which bag to start at.
+	local startBag, endBag, stepBag = NUM_BAG_SLOTS, 0, -1
+	if C_Container.GetSortBagsRightToLeft() then
+		startBag, endBag, stepBag = 0, NUM_BAG_SLOTS, 1
+	end
+	for bagid = startBag, endBag, stepBag do
 		freeSlots, typeid = C_Container.GetContainerNumFreeSlots(bagid)
 		isEquipmentBag = C_Container.GetBagSlotFlag( bagid, 2 )
 		--isEquipmentBag = true    -- @TODO:   figure this shit out again.

@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  December 31 2022
--- Revision:  9.0.3-4-g11727de-100002
+-- Date    :  March 5 2023
+-- Revision:  9.0.3-6-gc0d8064-100002
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -400,7 +400,8 @@ Frame = {
 		["SetAttribute"] = function() end,
 
 		["SetChecked"] = function() end,
-		["SetText"] = function() end,
+		["SetText"] = function(self, textIn) self.textValue = textIn; end,
+		["GetText"] = function(self) return( self.textValue ); end,
 }
 FrameGameTooltip = {
 		["HookScript"] = function( self, callback ) end,
@@ -793,6 +794,7 @@ end
 
 
 C_Container = {}
+C_Container.SortBagsRightToLeft = false -- this is normal
 function C_Container.GetContainerItemInfo( bagId, slotId )
 end
 function C_Container.GetContainerItemLink( bagId, slotId )
@@ -822,6 +824,9 @@ function C_Container.GetContainerNumSlots( bagId )
 	else
 		return 0
 	end
+end
+function C_Container.GetSortBagsRightToLeft()
+	return C_Container.SortBagsRightToLeft
 end
 function C_Container.UseContainerItem( bagId, slotId )
 end
