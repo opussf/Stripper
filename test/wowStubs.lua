@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  March 5 2023
--- Revision:  9.0.3-6-gc0d8064-100002
+-- Date    :  May 20 2023
+-- Revision:  9.0.4-4-g4dbc6c4
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -53,10 +53,12 @@ onCursor = {}
 globals = {}
 accountExpansionLevel = 4   -- 0 to 5
 -- registeredPrefixes - populated by the RegisterAddonMessagePrefix( prefix )
+unitSpeeds = { ["player"] = 0 }
 
 myStatistics = {
 	[60] = 42  -- 60 = deaths
 }
+myLocale = "enUS"
 
 registeredPrefixes = {}
 
@@ -415,9 +417,24 @@ FrameGameTooltip = {
 			_G[frameName.."TextLeft4"] = CreateFontString(frameName.."TextLeft4")
 		end,
 }
+        -- None = 0
+        -- Warrior = 1
+        -- Paladin = 2
+        -- Hunter = 3
+        -- Rogue = 4
+        -- Priest = 5
+        -- DeathKnight = 6
+        -- Shaman = 7
+        -- Mage = 8
+        -- Warlock = 9
+        -- Monk = 10
+        -- Druid = 11
+        -- Demon Hunter = 12
 Units = {
 	["player"] = {
 		["class"] = "Warlock",
+		["classCAPS"] = "WARLOCK",
+		["classIndex"] = 9,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "testPlayer",
 		["race"] = "Human",
@@ -429,6 +446,8 @@ Units = {
 	},
 	["sameRealmUnit"] = {
 		["class"] = "Warrior",
+		["classCAPS"] = "WARRIOR",
+		["classIndex"] = 1,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "sameRealmPlayer",
 		["race"] = "Gnome",
@@ -438,6 +457,8 @@ Units = {
 	},
 	["coalescedRealmUnit"] = {
 		["class"] = "Monk",
+		["classCAPS"] = "MONK",
+		["classIndex"] = 10,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "coalescedUnit",
 		["race"] = "Pandarian",
@@ -446,6 +467,8 @@ Units = {
 	},
 	["connectedRealmUnit"] = {
 		["class"] = "Mage",
+		["classCAPS"] = "MAGE",
+		["classIndex"] = 8,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "connectedUnit",
 		["realm"] = "connectedRealm",
@@ -917,6 +940,9 @@ function GetItemInfo( itemIn )
 		return Items[itemID].name, Items[itemID].link
 	end
 end
+function GetLocale()
+	return myLocale
+end
 function GetMastery()
 	return 21.3572
 end
@@ -1157,6 +1183,11 @@ function GetUnitName( lookupStr )
 		return myParty.roster[partyIndex]
 	end
 end
+function GetUnitSpeed( lookupStr )
+	lookupStr = string.lower( lookupStr )
+
+	return (unitSpeeds[lookupStr])
+end
 --[[
 function HasNewMail()
 	return true
@@ -1199,6 +1230,10 @@ function IsInRaid()
 	-- 1, nill boolean return of being in raid
 	-- myParty = { ["group"] = nil, ["raid"] = nil } -- set one of these to true to reflect being in group or raid.
 	return ( myParty["raid"] and 1 or nil )
+end
+function IsFlying()
+end
+function IsMounted()
 end
 function GetCursorInfo()
 end
@@ -1435,7 +1470,7 @@ function UnitAura( unit, index, filter )
 	end
 end
 function UnitClass( who )
-	return Units[who].class
+	return Units[who].class, Units[who].classCAPS, Units[who].classIndex
 end
 function UnitGUID( who )
 	return "playerGUID"
@@ -1617,6 +1652,14 @@ function C_CurrencyInfo.GetCurrencyLink( id )
 	if Currencies[id] then
 		return Currencies[id].link
 	end
+end
+
+Enum = {}
+Enum.TooltipDataType = {}
+Enum.TooltipDataType.Item = 0
+
+TooltipDataProcessor = {}
+function TooltipDataProcessor.AddTooltipPostCall()
 end
 
 -----------------------------------------
