@@ -42,6 +42,7 @@ Stripper.bitFields = {
 	["combat"] = 0x01,
 	["fishing"] = 0x02,
 	["petbattle"] = 0x04,
+	["loadingscreen"] = 0x08,
 }
 
 -- Support code
@@ -80,6 +81,9 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("PET_BATTLE_OPENING_START")
 	StripperFrame:RegisterEvent("PET_BATTLE_CLOSE")
 	StripperFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	StripperFrame:RegisterEvent("LOADING_SCREEN_ENABLED")
+	StripperFrame:RegisterEvent("LOADING_SCREEN_DISABLED")
+
 
 	--register slash commands
 	SLASH_STRIPPER1 = "/stripper";
@@ -107,6 +111,14 @@ end
 function Stripper.PET_BATTLE_CLOSE()
 	Stripper.clearIsBusy( Stripper.bitFields.petbattle )
 	if Stripper.addLater then Stripper.addLater = time() + 2 end
+	Stripper.OnUpdate()
+end
+function Stripper.LOADING_SCREEN_ENABLED()
+	Stripper.setIsBusy( Stripper.bitFields.loadingscreen )
+end
+function Stripper.LOADING_SCREEN_DISABLED()
+	Stripper.clearIsBusy( Stripper.bitFields.loadingscreen )
+	if Stripper.addLater then Stripper.addLater = time() + 180 end
 	Stripper.OnUpdate()
 end
 function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
@@ -301,6 +313,10 @@ function Stripper.AddOne()
 		Stripper_TimerBar:Hide()
 	end
 end
+function Stripper.Stop()
+	Stripper.targetSet = nil
+	Stripper.targetSetItemArray = nil
+end
 -- Command code
 function Stripper.PrintHelp()
 	Stripper.Print(STRIPPER_MSG_ADDONNAME.." version: "..STRIPPER_MSG_VERSION)
@@ -316,9 +332,9 @@ Stripper.commandList = {
 		["func"] = Stripper.PrintHelp,
 		["help"] = {"", "Print this help"},
 	},
-	["remove"] = {
-		["func"] = Stripper.RemoveOne,
-		["help"] = {"", "Remove a piece of gear. Default action."},
+	["stop"] = {
+		["func"] = Stripper.Stop,
+		["help"] = {"", "Stops current stripper actions."},
 	},
 	["<EquipmentSet>"] = {
 		["help"] = {"<delay seconds>", "Change to <EquipmentSet>, one piece every <delay seconds>"}
@@ -349,7 +365,7 @@ function Stripper.Command( msg )
 			--Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
 			Stripper.AddOne();
 		else
-			Stripper.commandList.remove.func()
+			Stripper.RemoveOne()
 		end
 	end
 end

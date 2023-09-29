@@ -4,7 +4,7 @@
 ## Author: opussf
 ## Version: @VERSION@
 ## Description: Slowly removes gear to lower iLvl to play "Gear Golf"
-## SavedVariables:
+## SavedVariables: Stripper_Log
 ## OptionalDeps: Rested
 Stripper.lua
 Stripper.xml
