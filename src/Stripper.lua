@@ -43,7 +43,7 @@ Stripper.bitFields = {
 	["fishing"] = 0x02,
 	["petbattle"] = 0x04,
 	["loadingscreen"] = 0x08,
-	["spellcasting"] = 0x16,
+	["spellcasting"] = 0x10,
 }
 
 -- Support code
