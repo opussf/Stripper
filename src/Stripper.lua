@@ -45,7 +45,6 @@ Stripper.bitFields = {
 	["loadingscreen"] = 0x08,
 	["spellcasting"] = 0x16,
 }
-Stripper_log = {}
 
 -- Support code
 function Stripper.Print( msg, showName)
@@ -55,7 +54,6 @@ function Stripper.Print( msg, showName)
 		msg = COLOR_RED..STRIPPER_MSG_ADDONNAME.."> "..COLOR_END..msg;
 	end
 	DEFAULT_CHAT_FRAME:AddMessage( msg )
-	Stripper.LogMsg( msg )
 end
 function Stripper.ParseCmd(msg)
 	if msg then
@@ -101,50 +99,41 @@ function Stripper.ADDON_LOADED( _, arg1 )
 	if( arg1 == STRIPPER_SLUG ) then
 		Stripper.Print( STRIPPER_MSG_VERSION.." loaded" )
 		StripperFrame:UnregisterEvent("ADDON_LOADED")
-		Stripper.LogMsg( "Stripper LOADED for "..Stripper.name )
 	end
 end
 function Stripper.PLAYER_REGEN_ENABLED()
 	Stripper.clearIsBusy( Stripper.bitFields.combat )
-	Stripper.LogMsg( "PLAYER_REGEN_ENABLED" )
 	Stripper.OnUpdate()
 end
 function Stripper.PLAYER_REGEN_DISABLED()
 	Stripper.setIsBusy( Stripper.bitFields.combat )
-	Stripper.LogMsg( "PLAYER_REGEN_DISABLED" )
 end
 function Stripper.PET_BATTLE_OPENING_START()
 	Stripper.setIsBusy( Stripper.bitFields.petbattle )
-	Stripper.LogMsg( "PET_BATTLE_OPENING_START" )
 end
 function Stripper.PET_BATTLE_CLOSE()
 	Stripper.clearIsBusy( Stripper.bitFields.petbattle )
 	if Stripper.addLater then Stripper.addLater = time() + 5 end
-	Stripper.LogMsg( "PET_BATTLE_CLOSE" )
 	Stripper.OnUpdate()
 end
 function Stripper.LOADING_SCREEN_ENABLED()
 	Stripper.setIsBusy( Stripper.bitFields.loadingscreen )
-	Stripper.LogMsg( "LOADING_SCREEN_ENABLED" )
 end
 function Stripper.LOADING_SCREEN_DISABLED()
 	Stripper.clearIsBusy( Stripper.bitFields.loadingscreen )
 	if Stripper.addLater then Stripper.addLater = time() + 5 end
-	Stripper.LogMsg( "LOADING_SCREEN_DISABLED" )
 	Stripper.OnUpdate()
 end
 function Stripper.UNIT_SPELLCAST_START( arg1, arg2 )
 	if arg1 and arg1 == "player" then
 		--Stripper.Print( "START >> "..arg1..":"..(arg2 or "nil") )
 		Stripper.setIsBusy( Stripper.bitFields.spellcasting )
-		Stripper.LogMsg( "UNIT_SPELLCAST_START" )
 	end
 end
 function Stripper.UNIT_SPELLCAST_STOP( arg1, arg2 )
 	if arg1 and arg1 == "player" then
 		--Stripper.Print( "STOP  >> "..arg1..":"..(arg2 or "nil") )
 		Stripper.clearIsBusy( Stripper.bitFields.spellcasting )
-		Stripper.LogMsg( "UNIT_SPELLCAST_STOP" )
 	end
 	Stripper.OnUpdate()
 end
@@ -159,16 +148,6 @@ function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
 			Stripper.clearIsBusy( Stripper.bitFields.fishing )
 		end
 	end
-end
-function Stripper.LogMsg( msg, debugLevel, alsoPrint )
-	-- debugLevel  (Always - nil), (Critical - 1), (Error - 2), (Warning - 3), (Info - 4)
-	if( debugLevel == nil ) or
-			( ( debugLevel and StripDice_options.debugLevel ) and StripDice_options.debugLevel >= debugLevel ) then
-		table.insert( Stripper_log, { [time()] = (debugLevel and debugLevel..": " or "" )..Stripper.name..": "..msg } )
-		--Stripper.Print( msg )
-	end
-	--table.insert( StripDice_log, { [time()] = msg } )
-	--if( alsoPrint ) then StripDice.Print( msg ); end
 end
 function Stripper.setIsBusy( valIn )
 	Stripper.isBusy = bit.bor( (Stripper.isBusy or 0), valIn )
@@ -256,7 +235,6 @@ function Stripper.RemoveFromSlot( slotName, report )
 		if report then
 			Stripper.Print( "Removing "..(GetInventoryItemLink("player",slotNum) or "nil") )
 		end
-		Stripper.LogMsg( "Removing "..(GetInventoryItemLink("player",slotNum) or "nil") )
 		PickupInventoryItem(slotNum)
 		if freeBagId == 0 then
 			PutItemInBackpack()
@@ -279,7 +257,6 @@ function Stripper.RemoveOne()
 		if slotName then
 			Stripper.RemoveFromSlot( slotName, true )
 		end
-		Stripper.LogMsg( "RemoveOne: Removing from slot: "..(slotName or "") )
 		Stripper.removeLater = nil
 	end
 	if Rested then
