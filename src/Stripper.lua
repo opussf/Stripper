@@ -96,12 +96,12 @@ function Stripper.OnLoad()
 	SLASH_STRIPPER3 = "/mm";
 	SlashCmdList["STRIPPER"] = function(msg) Stripper.Command(msg); end
 	Stripper.name = UnitName( "player" )
-	Stripper.LogMsg( "Stripper LOADED for "..Stripper.name )
 end
 function Stripper.ADDON_LOADED( _, arg1 )
 	if( arg1 == STRIPPER_SLUG ) then
 		Stripper.Print( STRIPPER_MSG_VERSION.." loaded" )
 		StripperFrame:UnregisterEvent("ADDON_LOADED")
+		Stripper.LogMsg( "Stripper LOADED for "..Stripper.name )
 	end
 end
 function Stripper.PLAYER_REGEN_ENABLED()
@@ -164,7 +164,7 @@ function Stripper.LogMsg( msg, debugLevel, alsoPrint )
 	-- debugLevel  (Always - nil), (Critical - 1), (Error - 2), (Warning - 3), (Info - 4)
 	if( debugLevel == nil ) or
 			( ( debugLevel and StripDice_options.debugLevel ) and StripDice_options.debugLevel >= debugLevel ) then
-		table.insert( Stripper_log, { [time()] = (debugLevel and debugLevel..": " or "" )..msg } )
+		table.insert( Stripper_log, { [time()] = (debugLevel and debugLevel..": " or "" )..Stripper.name..": "..msg } )
 		--Stripper.Print( msg )
 	end
 	--table.insert( StripDice_log, { [time()] = msg } )
