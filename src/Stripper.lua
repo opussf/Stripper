@@ -42,6 +42,8 @@ Stripper.bitFields = {
 	["combat"] = 0x01,
 	["fishing"] = 0x02,
 	["petbattle"] = 0x04,
+	["loadingscreen"] = 0x08,
+	["spellcasting"] = 0x16,
 }
 
 -- Support code
@@ -51,7 +53,7 @@ function Stripper.Print( msg, showName)
 	if (showName == nil) or (showName) then
 		msg = COLOR_RED..STRIPPER_MSG_ADDONNAME.."> "..COLOR_END..msg;
 	end
-	DEFAULT_CHAT_FRAME:AddMessage( msg );
+	DEFAULT_CHAT_FRAME:AddMessage( msg )
 end
 function Stripper.ParseCmd(msg)
 	if msg then
@@ -80,6 +82,11 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("PET_BATTLE_OPENING_START")
 	StripperFrame:RegisterEvent("PET_BATTLE_CLOSE")
 	StripperFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	StripperFrame:RegisterEvent("LOADING_SCREEN_ENABLED")
+	StripperFrame:RegisterEvent("LOADING_SCREEN_DISABLED")
+	StripperFrame:RegisterEvent("UNIT_SPELLCAST_START")
+	StripperFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+
 
 	--register slash commands
 	SLASH_STRIPPER1 = "/stripper";
@@ -106,7 +113,28 @@ function Stripper.PET_BATTLE_OPENING_START()
 end
 function Stripper.PET_BATTLE_CLOSE()
 	Stripper.clearIsBusy( Stripper.bitFields.petbattle )
-	if Stripper.addLater then Stripper.addLater = time() + 2 end
+	if Stripper.addLater then Stripper.addLater = time() + 5 end
+	Stripper.OnUpdate()
+end
+function Stripper.LOADING_SCREEN_ENABLED()
+	Stripper.setIsBusy( Stripper.bitFields.loadingscreen )
+end
+function Stripper.LOADING_SCREEN_DISABLED()
+	Stripper.clearIsBusy( Stripper.bitFields.loadingscreen )
+	if Stripper.addLater then Stripper.addLater = time() + 5 end
+	Stripper.OnUpdate()
+end
+function Stripper.UNIT_SPELLCAST_START( arg1, arg2 )
+	if arg1 and arg1 == "player" then
+		--Stripper.Print( "START >> "..arg1..":"..(arg2 or "nil") )
+		Stripper.setIsBusy( Stripper.bitFields.spellcasting )
+	end
+end
+function Stripper.UNIT_SPELLCAST_STOP( arg1, arg2 )
+	if arg1 and arg1 == "player" then
+		--Stripper.Print( "STOP  >> "..arg1..":"..(arg2 or "nil") )
+		Stripper.clearIsBusy( Stripper.bitFields.spellcasting )
+	end
 	Stripper.OnUpdate()
 end
 function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
@@ -121,7 +149,6 @@ function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
 		end
 	end
 end
-
 function Stripper.setIsBusy( valIn )
 	Stripper.isBusy = bit.bor( (Stripper.isBusy or 0), valIn )
 end
@@ -230,7 +257,7 @@ function Stripper.RemoveOne()
 		if slotName then
 			Stripper.RemoveFromSlot( slotName, true )
 		end
-		Stripper.removeLater = nil;
+		Stripper.removeLater = nil
 	end
 	if Rested then
 		--Rested.Command( "iLvl" )
@@ -294,12 +321,16 @@ function Stripper.AddOne()
 				--print(i, Stripper.slotListMap[i], equipped, (GetItemInfo(Stripper.targetSetItemArray[i])));
 			end
 		end
-		Stripper.targetSet = nil
-		Stripper.targetSetItemArray = nil
-		Stripper.Print("Ending targetSet");
-		Stripper.addLater = nil;
-		Stripper_TimerBar:Hide()
+		Stripper.Stop()
 	end
+end
+function Stripper.Stop()
+	Stripper.targetSet = nil
+	Stripper.targetSetItemArray = nil
+	Stripper.Print("Ending targetSet")
+	Stripper.addLater = nil
+	Stripper_TimerBar:Hide()
+	Stripper.isBusy = nil
 end
 -- Command code
 function Stripper.PrintHelp()
@@ -316,9 +347,9 @@ Stripper.commandList = {
 		["func"] = Stripper.PrintHelp,
 		["help"] = {"", "Print this help"},
 	},
-	["remove"] = {
-		["func"] = Stripper.RemoveOne,
-		["help"] = {"", "Remove a piece of gear. Default action."},
+	["stop"] = {
+		["func"] = Stripper.Stop,
+		["help"] = {"", "Stops current stripper actions."},
 	},
 	["<EquipmentSet>"] = {
 		["help"] = {"<delay seconds>", "Change to <EquipmentSet>, one piece every <delay seconds>"}
@@ -335,7 +366,7 @@ function Stripper.Command( msg )
 		if setName then
 			Stripper.setWaitTime = tonumber(param) or 5
 			Stripper.targetSet = setName
-			Stripper.Print("Set targetSet to "..Stripper.targetSet);
+			Stripper.Print("Set targetSet to "..Stripper.targetSet)
 			local setItemArray = C_EquipmentSet.GetItemIDs( setNum )
 			local setIgnoredSlots = C_EquipmentSet.GetIgnoredSlots( setNum )
 
@@ -349,7 +380,7 @@ function Stripper.Command( msg )
 			--Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
 			Stripper.AddOne();
 		else
-			Stripper.commandList.remove.func()
+			Stripper.RemoveOne()
 		end
 	end
 end

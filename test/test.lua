@@ -7,6 +7,7 @@ require "wowTest"
 -- Figure out how to parse the XML here, until then....
 StripperFrame = Frame
 Stripper_TimerBar = CreateStatusBar()
+Stripper_TimerBarText = CreateFontString()
 
 -- require the file to test
 ParseTOC( "../src/Stripper.toc" )
