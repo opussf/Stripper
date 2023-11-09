@@ -77,6 +77,7 @@ end
 -- Event Handlers
 function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("ADDON_LOADED")
+	StripperFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	StripperFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 	StripperFrame:RegisterEvent("PET_BATTLE_OPENING_START")
@@ -93,7 +94,6 @@ function Stripper.OnLoad()
 	SLASH_STRIPPER2 = "/st";
 	SLASH_STRIPPER3 = "/mm";
 	SlashCmdList["STRIPPER"] = function(msg) Stripper.Command(msg); end
-	Stripper.name = UnitName( "player" )
 end
 function Stripper.ADDON_LOADED( _, arg1 )
 	if( arg1 == STRIPPER_SLUG ) then
@@ -101,6 +101,11 @@ function Stripper.ADDON_LOADED( _, arg1 )
 		StripperFrame:UnregisterEvent("ADDON_LOADED")
 	end
 end
+function Stripper.PLAYER_ENTERING_WORLD()
+	StripperFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	Stripper.name_realm = UnitName( "player" ).."-"..GetNormalizedRealmName()
+end
+
 function Stripper.PLAYER_REGEN_ENABLED()
 	Stripper.clearIsBusy( Stripper.bitFields.combat )
 	Stripper.OnUpdate()
@@ -140,7 +145,7 @@ end
 function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
 	local _, t, _, sourceID, sourceName, sourceFlags, sourceRaidFlags,
 			destID, destName, destFlags, _, spellID, spName, _, ext1, ext2, ext3 = CombatLogGetCurrentEventInfo()
-	if sourceName == Stripper.name and spName == "Fishing" then
+	if sourceName == Stripper.name_realm and spName == "Fishing" then
 		--print( t, sourceName, spName )
 		if t == "SPELL_AURA_APPLIED" then
 			Stripper.setIsBusy( Stripper.bitFields.fishing )

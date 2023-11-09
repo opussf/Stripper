@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  May 20 2023
--- Revision:  9.0.4-4-g4dbc6c4
+-- Date    :  October 28 2023
+-- Revision:  9.0.4-5-gae4ae23
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -394,6 +394,8 @@ Frame = {
 		["SetHeight"] = function(self, value) self.height = value; end,
 		["GetHeight"] = function(self) return( self.height ); end,
 		["CreateFontString"] = function(self, ...) return(CreateFontString(...)) end,
+		["SetSize"] = function(self, x, y) end,
+		["ClearAllPoints"] = function(self) end,
 
 		["SetMinMaxValues"] = function(self, min, max) self.min=min; self.max=max; end,
 		["SetValue"] = function(self, value) self.value=value end,
