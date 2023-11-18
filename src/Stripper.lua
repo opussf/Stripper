@@ -103,7 +103,8 @@ function Stripper.ADDON_LOADED( _, arg1 )
 end
 function Stripper.PLAYER_ENTERING_WORLD()
 	StripperFrame:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	Stripper.name_realm = UnitName( "player" ).."-"..GetNormalizedRealmName()
+	Stripper.name = UnitName( "player" )
+	Stripper.name_realm = Stripper.name.."-"..GetNormalizedRealmName()
 end
 
 function Stripper.PLAYER_REGEN_ENABLED()
@@ -145,7 +146,8 @@ end
 function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
 	local _, t, _, sourceID, sourceName, sourceFlags, sourceRaidFlags,
 			destID, destName, destFlags, _, spellID, spName, _, ext1, ext2, ext3 = CombatLogGetCurrentEventInfo()
-	if sourceName == Stripper.name_realm and spName == "Fishing" then
+	if spName == "Fishing"
+			and ( sourceName == Stripper.name_realm or sourceName == Stripper.name ) then
 		--print( t, sourceName, spName )
 		if t == "SPELL_AURA_APPLIED" then
 			Stripper.setIsBusy( Stripper.bitFields.fishing )
