@@ -44,6 +44,7 @@ Stripper.bitFields = {
 	["petbattle"] = 0x04,
 	["loadingscreen"] = 0x08,
 	["spellcasting"] = 0x10,
+	["dead"] = 0x20,
 }
 
 -- Support code
@@ -87,7 +88,8 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("LOADING_SCREEN_DISABLED")
 	StripperFrame:RegisterEvent("UNIT_SPELLCAST_START")
 	StripperFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-
+	StripperFrame:RegisterEvent("PLAYER_DEAD")
+	StripperFrame:RegisterEvent("PLAYER_UNGHOST")
 
 	--register slash commands
 	SLASH_STRIPPER1 = "/stripper";
@@ -142,6 +144,12 @@ function Stripper.UNIT_SPELLCAST_STOP( arg1, arg2 )
 		Stripper.clearIsBusy( Stripper.bitFields.spellcasting )
 	end
 	Stripper.OnUpdate()
+end
+function Stripper.PLAYER_DEAD( ... )
+	Stripper.setIsBusy( Stripper.bitFields.dead )
+end
+function Stripper.PLAYER_UNGHOST( ... )
+	Stripper.clearIsBusy( Stripper.bitFields.dead )
 end
 function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
 	local _, t, _, sourceID, sourceName, sourceFlags, sourceRaidFlags,
