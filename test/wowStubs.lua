@@ -1,13 +1,19 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  October 28 2023
--- Revision:  9.0.4-5-gae4ae23
+-- Date    :  February 18 2024
+-- Revision:  9.2
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
 -- Most are only stubbed enough to pass the tests
 -- This is not intended to replace WoWBench, but to provide a stub structure for
 --     automated unit tests.
+-- Setup:
+-- * Create test.lua  - Add #!/usr/bin/env lua
+-- * require "wowTest"
+-- * set test.outFileName to an ouput.xml file
+-- * Parse the TOC - ParseTOC( "../src/sonthing.toc" )
+-- * Setup any 'Normal Frames'
 
 settings = {
 }
@@ -64,11 +70,12 @@ registeredPrefixes = {}
 
 SlotListMap={ "HeadSlot","NeckSlot","ShoulderSlot","ShirtSlot","ChestSlot","WaistSlot","LegsSlot",
 		"FeetSlot", "WristSlot", "HandsSlot", "Finger0Slot","Finger1Slot","Trinket0Slot","Trinket1Slot",
-		"BackSlot","MainHandSlot","SecondaryHandSlot","RangedSlot","TabardSlot", "Bag0Slot", "Bag1Slot",
+		"BackSlot", "MainHandSlot","SecondaryHandSlot","RangedSlot","TabardSlot", "Bag0Slot", "Bag1Slot",
 		"Bag2Slot", "Bag3Slot",
 }
 myGear = {} -- items that are equipped in the above slots, index matching
 Items = {
+	["6948"] = {["name"] = "Hearthstone", ["link"] = "|cffffffff|Hitem:6948::::::::70:258:::::::::|h[Hearthstone]|h|r", ["texture"] = ""},
 	["7073"] = {["name"] = "Broken Fang", ["link"] = "|cff9d9d9d|Hitem:7073:0:0:0:0:0:0:0:80:0:0|h[Broken Fang]|h|r", ["texture"] = ""},
 	["6742"] = {["name"] = "UnBroken Fang", ["link"] = "|cff9d9d9d|Hitem:6742:0:0:0:0:0:0:0:80:0:0|h[UnBroken Fang]|h|r", ["texture"] = ""},
 	["22261"] = {["name"] = "Love Fool", ["link"] = "|cff9d9d9d|Hitem:22261:0:0:0:0:0:0:0:80:0:0|h[Love Fool]|h|r", ["texture"] = ""},
@@ -203,6 +210,9 @@ Achievements = {
 EquipmentSets = {
 	{["name"] = "testSet", ["icon"] = "icon", ["items"] = {[1] = "113596"},},
 }
+-- Instance variables
+LE_PARTY_CATEGORY_HOME = 1
+LE_PARTY_CATEGORY_INSTANCE = 2
 -- WowToken
 TokenPrice = 123456 -- 12G 34S 45C
 --- Factions
@@ -273,6 +283,7 @@ function wowClearAura( unit, auraName )
 end
 
 -- WOW's function renames
+format = string.format
 strmatch = string.match
 strfind = string.find
 strsub = string.sub
@@ -379,11 +390,12 @@ ITEM_BIND_ON_PICKUP="Binds when picked up"
 Frame = {
 		["__isShown"] = true,
 		["Events"] = {},
+		["points"] = {},
 		["Hide"] = function( self ) self.__isShown = false; end,
 		["Show"] = function( self ) self.__isShown = true; end,
 		["IsVisible"] = function( self ) return( self.__isShown ) end,
 		["RegisterEvent"] = function(self, event) self.Events[event] = true; end,
-		["SetPoint"] = function() end,
+		["SetPoint"] = function(self, ... ) table.insert( self.points, {...} ); end,
 		["UnregisterEvent"] = function(self, event) self.Events[event] = nil; end,
 		["GetName"] = function(self) return self.framename end,
 		["SetFrameStrata"] = function() end,
@@ -395,24 +407,30 @@ Frame = {
 		["GetHeight"] = function(self) return( self.height ); end,
 		["CreateFontString"] = function(self, ...) return(CreateFontString(...)) end,
 		["SetSize"] = function(self, x, y) end,
-		["ClearAllPoints"] = function(self) end,
+		["ClearAllPoints"] = function(self) self.points={}; end,
+		["GetPoint"] = function(self) end,
+		["GetNumPoints"] = function(self) end,
 
 		["SetMinMaxValues"] = function(self, min, max) self.min=min; self.max=max; end,
 		["SetValue"] = function(self, value) self.value=value end,
 		["SetStatusBarColor"] = function() end,
-		["SetScript"] = function() end,
+		["SetScript"] = function(self, event, func) end,
 		["SetAttribute"] = function() end,
 
 		["SetChecked"] = function() end,
 		["SetText"] = function(self, textIn) self.textValue = textIn; end,
 		["GetText"] = function(self) return( self.textValue ); end,
+		["SetFrameLevel"] = function(self) end,
+		["SetAlpha"] = function(self, value) end,
 }
 FrameGameTooltip = {
 		["HookScript"] = function( self, callback ) end,
 		["GetName"] = function(self) return self.name end,
+		["GetUnit"] = function(self) return self.name end,
 		["SetOwner"] = function(self, newOwner) end, -- this is only for tooltip frames...
 		["ClearLines"] = function(self) end, -- this is only for tooltip frames...
 		["SetHyperlink"] = function(self, hyperLink) end, -- this is only for tooltip frames...
+		["AddLine"] = function(self, line) self.line = line end,
 		["init"] = function(frameName)
 			_G[frameName.."TextLeft2"] = CreateFontString(frameName.."TextLeft2")
 			_G[frameName.."TextLeft3"] = CreateFontString(frameName.."TextLeft3")
@@ -476,6 +494,16 @@ Units = {
 		["realm"] = "connectedRealm",
 		["realmRelationship"] = 3,
 	},
+	["mouseover"] = {
+		["class"] = "Priest",
+		["classCAPS"] = "PRIEST",
+		["classIndex"] = 99999,  -- find this out
+		["faction"] = {"Alliance", "Alliance"},
+		["name"] = "mousename",
+		["race"] = "Dwarf",
+		["realm"] = "mouserealm",
+		["sex"] = 1,
+	},
 
 }
 function CreateFrame( frameType, frameName, parentFrame, inheritFrame )
@@ -517,16 +545,8 @@ function CreateStatusBar( name, ... )
 		StatusBar[k] = v
 	end
 	StatusBar.name=name
-
-	StatusBar["SetMinMaxValues"] = function() end;
-	StatusBar["Show"] = function() end;
-
 	return StatusBar
 end
-Slider = {
-		["GetName"] = function() return ""; end,
-		["SetText"] = function(text) end,
-}
 function CreateSlider( name, ... )
 	Slider = {}
 	for k,v in pairs(Frame) do
@@ -534,8 +554,6 @@ function CreateSlider( name, ... )
 	end
 	Slider.name=name
 	Slider[name.."Text"] = CreateFontString(name.."Text")
-	Slider["GetName"] = function(self) return self.name; end
-	Slider["SetText"] = function(text) end
 	return Slider
 end
 CheckButton = {
@@ -568,8 +586,16 @@ function ChatFrame_AddMessageEventFilter()
 end
 
 -- WOW's resources
-DEFAULT_CHAT_FRAME={ ["AddMessage"] = print, }
-UIErrorsFrame={ ["AddMessage"] = print, }
+DEFAULT_CHAT_FRAME={ ["AddMessage"] = function( self, msg )
+		table.insert( chatLog,
+			{ ["msg"] = msg, ["chatType"] = "DEFAULT_CHAT_FRAME", ["language"] = "", ["channel"] = "DEFAULT_CHAT_FRAME" }
+		)
+	end, }
+UIErrorsFrame={ ["AddMessage"] = function( self, msg )
+		table.insert( chatLog,
+			{ ["msg"] = msg, ["chatType"] = "UIErrorsFrame", ["language"] = "", ["channel"] = "UIErrorsFrame" }
+		)
+	end, }
 
 -- stub some external API functions (try to keep alphabetical)
 function BuyMerchantItem( index, quantity )
@@ -1496,7 +1522,7 @@ function UnitLevel( who )
 	return unitLevels[who]
 end
 function UnitName( who )
-	return Units[who].name
+	return Units[who].name, Units[who].realm
 end
 function UnitPowerMax( who, powerType )
 	-- http://wowwiki.wikia.com/wiki/API_UnitPowerMax
@@ -1664,6 +1690,217 @@ TooltipDataProcessor = {}
 function TooltipDataProcessor.AddTooltipPostCall()
 end
 
+----------
+-- Macros
+----------
+myMacros = {}  -- ["macroName"] = { ["icon"] = "", ["text"] = "", ["isLocal"] = true }
+function GetMacroInfo( macroName )
+	-- returns:  macroName, macroIcon, macroText, isLocal (bool)
+	if myMacros[macroName] then
+		return macroName, myMacros[macroName][icon], myMacros[macroName][text], myMacros[macroName][isLocal] or false
+	end
+end
+function CreateMacro( macroName, macroIcon, macroText, perChar )
+	-- returns: macroID
+	if macroName and not myMacros[macroName] then
+		myMacros[macroName] = { ["icon"] = macroIcon, ["text"] = macroText }
+		return 1 -- return the ID
+	end
+end
+function EditMacto( macroName, newName, newIcon, body, islocal, perChar )
+	-- returns: new macroID
+	if macroName and myMacros[macroName] then
+		if newName then
+			myMacros[newName] = myMacros[macroName]
+			macroName = newName
+		end
+		if newIcon then
+			myMacros[macroName].icon = newIcon
+		end
+		myMacros[macroName].text = body
+		return 1 -- return the ID
+	end
+end
+
+--------
+-- C_ChatInfo
+--------
+C_ChatInfo = {}
+function C_ChatInfo.IsAddonMessagePrefixRegistered( prefix )
+	return true
+end
+function C_ChatInfo.RegisterAddonMessagePrefix( prefix )
+end
+function C_ChatInfo.SendAddonMessage()
+	return true
+end
+
+-- A SAX parser takes a content handler, which provides these methods:
+--     startDocument()                 -- called at the start of the Document
+--     endDocument()                   -- called at the end of the Document
+--     startElement( tagName, attrs )  -- with each tag start.  attrs is a table of attributes and values
+--     endElement( tagName )           -- when a tag ends
+--     characters( char )              -- for each character not being in a tag
+-- The parser calls each of these methods as these events happen.
+
+-- A SAX parser defines a parser (created with makeParser)
+-- a Parser has a ContentHandler assigned
+-- a Parser also defines these methods:
+--      setContentHandler( contentHandler )
+--      setFeature()  -- prob not going to implement
+--      parse( text )
+--      parse( file )
+
+-- https://www.w3schools.com/xml/xml_elements.asp
+-- https://www.w3schools.com/xml/xml_syntax.asp
+
+
+contentHandler = {}
+-- normally the contentHandler is an object, where data structures are created in the new object.
+function contentHandler.startDocument( this )
+end
+function contentHandler.endDocument( this )
+end
+function contentHandler.startElement( this, tagName, attrs )
+end
+function contentHandler.endElement( this, tagName )
+end
+function contentHandler.characters( this, char )
+end
+
+saxParser = {}
+-- SAX Parser
+-- interface
+function saxParser.makeParser()
+	-- make a parser.  This is probably intended to be a factory function
+	return saxParser
+end
+function saxParser.setContentHandler( contentHandlerIn )
+	-- takes a table
+	saxParser.contentHandler = contentHandlerIn
+end
+function saxParser.setFeature()
+	-- research this
+end
+function saxParser.parse( fileIn )
+	f = io.open( fileIn, "r" )
+	if f then fileIn = f:read( "*all" ) end   -- read the contents of the file
+
+	-- call the startDocument method for the given contentHandler
+	if saxParser.contentHandler and saxParser.contentHandler.startDocument then
+		saxParser.contentHandler:startDocument()
+	end
+
+	-- loop through each char
+	State = {
+		Outside       = { 0 },  -- outside of a tag
+		ElementName   = { 1 },  -- When to parse for a name
+		InElement     = { 2 },  -- In the element
+	}
+	currentState = State.Outside
+	elementDepth = {}   -- table of current element depth
+	elementName = ""
+	chars = ""
+
+	while( #fileIn > 0 ) do
+		-- print( currentState[1].."\t"..#fileIn, "fileIn: "..string.sub( fileIn, 1, 60 ) )
+		c = string.sub( fileIn, 1, 1 )
+		n = string.sub( fileIn, 2, 2 )
+		handled = false
+		if currentState == State.Outside then
+			if c == "<" then
+				if n == "?" then
+					local endProlog = string.find( fileIn, "?>" )
+					if endProlog then
+						fileIn = string.sub( fileIn, endProlog+2 )
+					end
+				elseif n == "!" then
+					local endComment = string.find( fileIn, "%-%->" )
+					if endComment then
+						fileIn = string.sub( fileIn, endComment+3 )
+					end
+				else
+					currentState = State.ElementName
+					elementName = ""
+					fileIn = string.sub( fileIn, 2 )
+				end
+			else
+				saxParser.contentHandler:characters( c )
+				fileIn = string.sub( fileIn, 2 )
+			end
+		elseif currentState == State.ElementName then
+			tagStart, tagEnd, tagName = string.find( fileIn, "^([%a_][%a%d-_.]*)" )
+			if tagStart then
+				elementName = tagName
+				attributes = {}
+				currentState = State.InElement
+				fileIn = string.sub( fileIn, tagEnd + 1 )
+			end
+			tagStart, tagEnd, tagName = string.find( fileIn, "^/([%a_][%a%d-_.]*)" )
+			if tagStart then
+				elementName = tagName
+				-- print( "Fire endElement( "..tagName.." )" )
+				depthElement = table.remove( elementDepth )
+				saxParser.contentHandler:endElement( tagName )
+				if depthElement ~= elementName then
+					fail( "ERROR: Closing "..elementName.." is not the expected element to close; "..( depthElement or "nil" ).." is expected." )
+				end
+				currentState = State.Outside
+				fileIn = string.sub( fileIn, tagEnd + 2 )
+			end
+		elseif currentState == State.InElement then
+			attribStart, attribEnd, key, value = string.find( fileIn, "^%s*(%S+)%s*=%s*[\"\'](.-)[\"\']" )
+			if c == ">" or n == ">" then
+				-- print( "Fire startElement( "..elementName.." )" )
+				-- print( "\twith attributes: ")
+				-- for k,v in pairs( attributes ) do
+					-- print( "\t\t"..k..":="..v )
+				-- end
+				table.insert( elementDepth, elementName )
+				saxParser.contentHandler:startElement( elementName, attributes )
+				currentState = State.Outside
+				if c == "/" and n == ">" then
+					-- print( "Fire endElement( "..elementName.." )" )
+					depthElement = table.remove( elementDepth )
+					saxParser.contentHandler:endElement( elementName )
+					if depthElement ~= elementName then
+						fail( "ERROR: Closing "..elementName.." is not the expected element to close; "..depthElement.." is expected." )
+					end
+					currentState = State.Outside
+				end
+				fileIn = string.sub( fileIn, (n==">" and 3 or 2) )
+			elseif c == " " then
+				fileIn = string.sub( fileIn, 2 )
+			elseif attribStart then
+				attributes[key] = value
+				fileIn = string.sub( fileIn, attribEnd+1 )
+			end
+		end
+		-- print( "elementDepth: "..table.concat( elementDepth, "\t" ) )
+	end
+
+	-- call the endDocument method for the given contentHandler
+	if saxParser.contentHandler and saxParser.contentHandler.endDocument then
+		saxParser.contentHandler:endDocument()
+	end
+end
+function ParseXML( xmlFile )
+	ch = contentHandler
+	ch.startElement = function( self, tagIn, attribs )
+		if _G["Create"..tagIn] then
+			if attribs.name then
+				_G[attribs.name] = _G["Create"..tagIn]( attribs.name )
+				_G[attribs.name].framename = attribs.name
+			else
+				fail("A "..tagIn.." needs a name")
+			end
+		end
+	end
+	parser = saxParser.makeParser()
+	parser.setContentHandler( ch )
+	parser.parse( xmlFile )
+end
+
 -----------------------------------------
 -- TOC functions
 addonData = {}
@@ -1684,7 +1921,9 @@ function ParseTOC( tocFile, useRequire )
 				if( hash ) then
 					addonData[ hashKey ] = hashValue
 				elseif( lua ) then
-					table.insert( tocFileTable, luaFile )
+					table.insert( tocFileTable, { "lua", luaFile } )
+				elseif( xml ) then
+					table.insert( tocFileTable, { "xml", xmlFile } )
 				end
 				tocContents = string.sub( tocContents, lineend+1 )
 			else
@@ -1703,21 +1942,28 @@ function ParseTOC( tocFile, useRequire )
 			--add to the include package.path
 			package.path = includePath.."?.lua;" .. package.path
 		end
-
 		sharedTable = {}
 
 		for _,f in pairs( tocFileTable ) do
-			if( useRequire ) then
-				require( f )
-			else
-				local loadedfile = assert( loadfile( includePath..f..".lua" ) )
-				loadedfile( addonName, sharedTable )
+			if( f[1] == "lua" ) then
+				if( useRequire ) then
+					require( f[2] )
+				else
+					local loadedfile = assert( loadfile( includePath..f[2]..".lua" ) )
+					loadedfile( addonName, sharedTable )
+				end
+			elseif( f[1] == "xml" ) then
+				ParseXML( includePath..f[2]..".xml" )
 			end
 		end
+	else
+		fail( "TOC file not found" )
 	end
 end
 
-
+-- Standard Frames
+GameTooltip = CreateFrame( "GameTooltip", "tooltip" )
+ChatFrame1 = CreateFrame( nil, "ChatFrame1" )
 
 ---   https://wowwiki.fandom.com/wiki/AddOn_loading_process
 --[[ Load event order:

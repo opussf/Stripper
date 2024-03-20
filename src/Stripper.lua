@@ -90,6 +90,7 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
 	StripperFrame:RegisterEvent("PLAYER_DEAD")
 	StripperFrame:RegisterEvent("PLAYER_UNGHOST")
+	StripperFrame:RegisterEvent("PLAYER_ALIVE")
 
 	--register slash commands
 	SLASH_STRIPPER1 = "/stripper";
@@ -149,6 +150,9 @@ function Stripper.PLAYER_DEAD( ... )
 	Stripper.setIsBusy( Stripper.bitFields.dead )
 end
 function Stripper.PLAYER_UNGHOST( ... )
+	Stripper.clearIsBusy( Stripper.bitFields.dead )
+end
+function Stripper.PLAYER_ALIVE( ... )
 	Stripper.clearIsBusy( Stripper.bitFields.dead )
 end
 function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
@@ -301,12 +305,11 @@ function Stripper.AddOne()
 			local slotName = Stripper.slotListMap[i]
 			if slotName then
 				local equipped = GetInventoryItemID("player",i)  -- nil if not equipped
-				--Stripper.Print("slot: "..i.." equipped:"..(equipped or "nil"))
-				--Stripper.Print("Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
+				Stripper.Print("slot: "..i.." equipped:"..(equipped or "nil").."  Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
 
 				if (Stripper.targetSetItemArray[i] ~= 1) and (equipped ~= Stripper.targetSetItemArray[i]) then
 					-- not to be ignored, and not the same item.
-					--print(Stripper.targetSetItemArray[i])
+					-- print(Stripper.targetSetItemArray[i])
 					if (not Stripper.targetSetItemArray[i]) then  -- remove item  -- changed from 0 to nil?
 						-- Stripper.Print( "Need to remove an item from "..slotName )
 						if Stripper.RemoveFromSlot( slotName, true ) then
@@ -316,13 +319,13 @@ function Stripper.AddOne()
 							break -- break from the for loop if unable to remove item
 						end
 					elseif (Stripper.targetSetItemArray[i]) then
-						--Stripper.Print("Looking at "..Stripper.targetSetItemArray[i])
+						-- Stripper.Print("Looking at "..Stripper.targetSetItemArray[i])
 						local _,itemLink = GetItemInfo(Stripper.targetSetItemArray[i])
 						if (GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
 							Stripper.Print( "Equipping "..(itemLink or "unknown") )
-							EquipItemByName( Stripper.targetSetItemArray[i], i )
+							EquipItemByName( Stripper.targetSetItemArray[i] )
 							Stripper.addLater = time()+Stripper.setWaitTime;
-							--Stripper.Print( "Setting future add to "..Stripper.addLater..". Now: "..time())
+							-- Stripper.Print( "Setting future add to "..Stripper.addLater..". Now: "..time())
 							return
 						else
 							Stripper.Print( (itemLink or "unknown").." is not available to equip." )
@@ -333,7 +336,7 @@ function Stripper.AddOne()
 						Stripper.Print("Slot "..i.." is nil?")
 					end
 				end
-				--print(i, Stripper.slotListMap[i], equipped, (GetItemInfo(Stripper.targetSetItemArray[i])));
+				-- print(i, Stripper.slotListMap[i], equipped, (GetItemInfo(Stripper.targetSetItemArray[i])));
 			end
 		end
 		Stripper.Stop()
@@ -346,6 +349,18 @@ function Stripper.Stop()
 	Stripper.addLater = nil
 	Stripper_TimerBar:Hide()
 	Stripper.isBusy = nil
+end
+function Stripper.Stuck()
+	local outStr
+	if Stripper.isBusy then
+		outStr = "You are busy ("..Stripper.isBusy..")"
+		for reason, val in pairs(Stripper.bitFields) do
+			if bit.band( Stripper.isBusy, val ) > 0 then
+				outStr = outStr .. " "..reason..", "
+			end
+		end
+	end
+	Stripper.Print( outStr or "You are not busy." )
 end
 -- Command code
 function Stripper.PrintHelp()
@@ -368,6 +383,10 @@ Stripper.commandList = {
 	},
 	["<EquipmentSet>"] = {
 		["help"] = {"<delay seconds>", "Change to <EquipmentSet>, one piece every <delay seconds>"}
+	},
+	["stuck"] = {
+		["func"] = Stripper.Stuck,
+		["help"] = {"", "Show and clear the busy flags"},
 	},
 }
 function Stripper.Command( msg )
