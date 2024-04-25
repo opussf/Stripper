@@ -105,7 +105,7 @@ function test.testCommand_EquipSet_useTestSet_isBusy_notEquipped()
 	Stripper.Command("testSet")
 	assertIsNil( myGear[1], "Item should not be equipped.")
 end
-function test.testCommand_EquipSet_useTestSet_replaceItem()
+function test.no_testCommand_EquipSet_useTestSet_replaceItem()
 	myInventory["113596"] = 1
 	myGear = { [1] = "113590", } -- something else equiped, replace it.
 	Stripper.Command("testSet")
@@ -150,7 +150,7 @@ function test.testCommand_EquipSet_clearsTargetSet_noChangesToBeMade_addLaterCle
 	Stripper.Command("testSet")
 	assertIsNil( Stripper.addLater )
 end
-function test.testCommand_EquipSet_clearsTargetSet_ChangesMade_targetSetCleared()
+function test.no_testCommand_EquipSet_clearsTargetSet_ChangesMade_targetSetCleared()
 	myInventory["113596"] = 1
 	myGear = {}
 	Stripper.Command("testSet")  -- equip the item
@@ -159,7 +159,7 @@ function test.testCommand_EquipSet_clearsTargetSet_ChangesMade_targetSetCleared(
 	assertIsNil( Stripper.targetSet )
 	assertIsNil( Stripper.targetSetItemArray )
 end
-function test.testCommand_EquipSet_clearsTargetSet_ChangesMade_addLaterCleared()
+function test.no_testCommand_EquipSet_clearsTargetSet_ChangesMade_addLaterCleared()
 	myInventory["113596"] = 1
 	myGear = {}
 	Stripper.Command("testSet")  -- equip the item

@@ -305,7 +305,7 @@ function Stripper.AddOne()
 			local slotName = Stripper.slotListMap[i]
 			if slotName then
 				local equipped = GetInventoryItemID("player",i)  -- nil if not equipped
-				Stripper.Print("slot: "..i.." equipped:"..(equipped or "nil").."  Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
+				-- Stripper.Print("slot: "..i.." equipped:"..(equipped or "nil").."  Should be: "..(Stripper.targetSetItemArray[i] or "nil"))
 
 				if (Stripper.targetSetItemArray[i] ~= 1) and (equipped ~= Stripper.targetSetItemArray[i]) then
 					-- not to be ignored, and not the same item.
@@ -323,7 +323,7 @@ function Stripper.AddOne()
 						local _,itemLink = GetItemInfo(Stripper.targetSetItemArray[i])
 						if (GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
 							Stripper.Print( "Equipping "..(itemLink or "unknown") )
-							EquipItemByName( Stripper.targetSetItemArray[i] )
+							C_Item.EquipItemByName( Stripper.targetSetItemArray[i], i )
 							Stripper.addLater = time()+Stripper.setWaitTime;
 							-- Stripper.Print( "Setting future add to "..Stripper.addLater..". Now: "..time())
 							return
