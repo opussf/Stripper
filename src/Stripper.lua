@@ -293,7 +293,7 @@ function Stripper.AddOne()
 		Stripper.addLater = time();
 		Stripper.Print("You are busy. An item will be equipped when you finish.");
 	else
-		ClearCursor();
+		ClearCursor()
 		local i = 0
 		for _,v in pairs(Stripper.slotListAdd) do -- Loop through the slot list
 			for ii=1, 19 do                    -- find the index number
@@ -401,18 +401,23 @@ function Stripper.Command( msg )
 			Stripper.setWaitTime = tonumber(param) or 5
 			Stripper.targetSet = setName
 			Stripper.Print("Set targetSet to "..Stripper.targetSet)
-			local setItemArray = C_EquipmentSet.GetItemIDs( setNum )
-			local setIgnoredSlots = C_EquipmentSet.GetIgnoredSlots( setNum )
+			if Stripper.setWaitTime == 0 then
+				C_EquipmentSet.UseEquipmentSet( setNum )
+				Stripper.Stop()
+			else
+				local setItemArray = C_EquipmentSet.GetItemIDs( setNum )
+				local setIgnoredSlots = C_EquipmentSet.GetIgnoredSlots( setNum )
 
-			for slot = 1, 19 do
-				local itemId = GetInventoryItemID( "player", slot )   -- nil means no current item
-				if( setIgnoredSlots[slot] and itemId ) then -- slot is ignored, and there is an item
-					setItemArray[slot] = itemId
+				for slot = 1, 19 do
+					local itemId = GetInventoryItemID( "player", slot )   -- nil means no current item
+					if( setIgnoredSlots[slot] and itemId ) then -- slot is ignored, and there is an item
+						setItemArray[slot] = itemId
+					end
 				end
+				Stripper.targetSetItemArray = setItemArray
+				--Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
+				Stripper.AddOne()
 			end
-			Stripper.targetSetItemArray = setItemArray
-			--Stripper.targetSetItemArray = C_EquipmentSet.GetItemIDs( setNum );
-			Stripper.AddOne();
 		else
 			Stripper.RemoveOne()
 		end
