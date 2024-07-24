@@ -282,6 +282,8 @@ function Stripper.RemoveOne()
 		--Rested.Command( "iLvl" )
 	end
 end
+Stripper.slotMapFix = {
+}
 function Stripper.AddOne()
 	-- Loop through the targetSetItemArray
 	-- Compare the item to the one in the slot.
