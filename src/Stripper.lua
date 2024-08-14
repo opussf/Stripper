@@ -1,7 +1,8 @@
+-- STRIPPER @VERSION@
 STRIPPER_SLUG, Stripper = ...
-STRIPPER_MSG_ADDONNAME = GetAddOnMetadata( STRIPPER_SLUG, "Title" )
-STRIPPER_MSG_AUTHOR    = GetAddOnMetadata( STRIPPER_SLUG, "Author" )
-STRIPPER_MSG_VERSION   = GetAddOnMetadata( STRIPPER_SLUG, "Version" )
+STRIPPER_MSG_ADDONNAME  = C_AddOns.GetAddOnMetadata( STRIPPER_SLUG, "Title" )
+STRIPPER_MSG_AUTHOR     = C_AddOns.GetAddOnMetadata( STRIPPER_SLUG, "Author" )
+STRIPPER_MSG_VERSION    = C_AddOns.GetAddOnMetadata( STRIPPER_SLUG, "Version" )
 
 -- Colours
 COLOR_RED = "|cffff0000";
