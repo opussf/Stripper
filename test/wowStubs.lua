@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  August 13 2024
--- Revision:  9.4.3-16-g4300a9c
+-- Date    :  September 30 2024
+-- Revision:  9.5-10-g3db6671
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -12,6 +12,7 @@
 -- * Create test.lua  - Add #!/usr/bin/env lua
 -- * require "wowTest"
 -- * set test.outFileName to an ouput.xml file
+-- * set test.coberturaFileName = "../coverage.xml" to enable coverage output
 -- * Parse the TOC - ParseTOC( "../src/sonthing.toc" )
 -- * Setup any 'Normal Frames'
 
@@ -333,7 +334,7 @@ format = string.format
 strmatch = string.match
 strfind = string.find
 strsub = string.sub
-strtolower = string.lower
+strlower = string.lower
 strlen = string.len
 time = os.time
 date = os.date
@@ -618,6 +619,8 @@ end
 EditBox = {
 		["SetText"] = function(self,text) self.text=text; end,
 		["SetCursorPosition"] = function(self,pos) self.cursorPosition=pos; end,
+		["HighlightText"] = function(self,start,last) end,
+		["IsNumeric"] = function() end,
 }
 function CreateEditBox( name, ... )
 	me = {}
@@ -902,6 +905,8 @@ function C_AddOns.GetNumAddOns()
 	return 1
 end
 function C_AddOns.LoadAddOn( addonName )
+end
+function C_AddOns.DisableAddOn( addonName, playerName )
 end
 
 C_Container = {}
@@ -1261,17 +1266,7 @@ function GetTradeSkillRecipeLink( index )
 	return TradeSkillItems[index].elink
 end
 function GetUnitName( lookupStr )
-	lookupStr = string.lower( lookupStr )
-	-- return the player's UnitName if asking for "player"
-	if lookupStr == "player" then
-		return UnitName( lookupStr )
-	end
-	_, _, partyType, partyIndex = string.find( lookupStr, "(%S+)(%d+)" )
-	partyIndex = tonumber( partyIndex )
-	-- only return the indexed playername if the party type matches, and the index exists
-	if( myParty[partyType] and myParty.roster[partyIndex] ) then
-		return myParty.roster[partyIndex]
-	end
+	error("This is deprecated")
 end
 function GetUnitSpeed( lookupStr )
 	lookupStr = string.lower( lookupStr )
@@ -1564,8 +1559,15 @@ end
 function UnitClass( who )
 	return Units[who].class, Units[who].classCAPS, Units[who].classIndex
 end
+function UnitExists( who )
+	return Units[who] and true or nil
+end
 function UnitGUID( who )
 	return "playerGUID"
+end
+function UnitGroupRolesAssigned( who )
+	print( "UnitGroupRolesAssigned( "..who.." )")
+	return Units[who].role
 end
 function UnitHealthMax( who )
 	-- http://wowwiki.wikia.com/wiki/API_UnitHealth
@@ -1923,6 +1925,21 @@ Menu = {}
 function Menu.ModifyMenu( ... )
 end
 
+----------
+-- C_Timer
+----------
+C_Timer = {}
+function C_Timer.After( seconds, callback )
+end
+
+----------
+-- C_QuestLog
+----------
+C_QuestLog = {}
+function C_QuestLog.IsQuestFlaggedCompleted()
+	return false
+end
+
 -- A SAX parser takes a content handler, which provides these methods:
 --     startDocument()                 -- called at the start of the Document
 --     endDocument()                   -- called at the end of the Document
@@ -2073,15 +2090,24 @@ function saxParser.parse( fileIn )
 	end
 end
 function ParseXML( xmlFile )
+	parents = {}
 	ch = contentHandler
 	ch.startElement = function( self, tagIn, attribs )
 		if _G["Create"..tagIn] then
-			if attribs.name then
-				_G[attribs.name] = _G["Create"..tagIn]( attribs.name )
-				_G[attribs.name].framename = attribs.name
-			else
-				fail("A "..tagIn.." needs a name")
+			if (attribs.name and (not attribs.virtual or attribs.virtual == "false")) then
+				-- print("Create: "..attribs.name..">"..(#parents > 0 and string.gsub(attribs.name, "$parent", parents[#parents]) or "") )
+				frameName = (#parents > 0 and string.gsub(attribs.name, "$parent", parents[#parents]) or attribs.name)
+				_G[frameName] = _G["Create"..tagIn]( frameName )
+				_G[frameName].framename = frameName
 			end
+		end
+		if string.find( tagIn, "Frame$") then
+			table.insert( parents, attribs.name )
+		end
+	end
+	ch.endElement = function( self, tagIn )
+		if string.find( tagIn, "Frame$" ) then
+			table.remove( parents )
 		end
 	end
 	parser = saxParser.makeParser()
