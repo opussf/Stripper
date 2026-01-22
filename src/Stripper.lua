@@ -84,9 +84,10 @@ function Stripper.OnLoad()
 	StripperFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 	StripperFrame:RegisterEvent("PET_BATTLE_OPENING_START")
 	StripperFrame:RegisterEvent("PET_BATTLE_CLOSE")
-	StripperFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	StripperFrame:RegisterEvent("LOADING_SCREEN_ENABLED")
 	StripperFrame:RegisterEvent("LOADING_SCREEN_DISABLED")
+	StripperFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+	StripperFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	StripperFrame:RegisterEvent("UNIT_SPELLCAST_START")
 	StripperFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
 	StripperFrame:RegisterEvent("PLAYER_DEAD")
@@ -134,6 +135,16 @@ function Stripper.LOADING_SCREEN_DISABLED()
 	if Stripper.addLater then Stripper.addLater = time() + 5 end
 	Stripper.OnUpdate()
 end
+function Stripper.UNIT_SPELLCAST_CHANNEL_START( unit, _, spellID )
+	if unit == "player" and spellID == 131476 then
+		Stripper.setIsBusy( Stripper.bitFields.fishing )
+	end
+end
+function Stripper.UNIT_SPELLCAST_CHANNEL_STOP( unit, _, spellID )
+	if unit == "player" and spellID == 131476 then
+		Stripper.clearIsBusy( Stripper.bitFields.fishing )
+	end
+end
 function Stripper.UNIT_SPELLCAST_START( arg1, arg2 )
 	if arg1 and arg1 == "player" then
 		--Stripper.Print( "START >> "..arg1..":"..(arg2 or "nil") )
@@ -155,19 +166,6 @@ function Stripper.PLAYER_UNGHOST( ... )
 end
 function Stripper.PLAYER_ALIVE( ... )
 	Stripper.clearIsBusy( Stripper.bitFields.dead )
-end
-function Stripper.COMBAT_LOG_EVENT_UNFILTERED()
-	local _, t, _, sourceID, sourceName, sourceFlags, sourceRaidFlags,
-			destID, destName, destFlags, _, spellID, spName, _, ext1, ext2, ext3 = CombatLogGetCurrentEventInfo()
-	if spName == "Fishing"
-			and ( sourceName == Stripper.name_realm or sourceName == Stripper.name ) then
-		--print( t, sourceName, spName )
-		if t == "SPELL_AURA_APPLIED" then
-			Stripper.setIsBusy( Stripper.bitFields.fishing )
-		elseif t == "SPELL_AURA_REMOVED" then
-			Stripper.clearIsBusy( Stripper.bitFields.fishing )
-		end
-	end
 end
 function Stripper.setIsBusy( valIn )
 	Stripper.isBusy = bit.bor( (Stripper.isBusy or 0), valIn )
