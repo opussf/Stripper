@@ -321,8 +321,8 @@ function Stripper.AddOne()
 						end
 					elseif (Stripper.targetSetItemArray[i]) then
 						-- Stripper.Print("Looking at "..Stripper.targetSetItemArray[i])
-						local _,itemLink = GetItemInfo(Stripper.targetSetItemArray[i])
-						if (GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
+						local _,itemLink = C_Item.GetItemInfo(Stripper.targetSetItemArray[i])
+						if (C_Item.GetItemCount(Stripper.targetSetItemArray[i]) > 0) then
 							Stripper.Print( "Equipping "..(itemLink or "unknown") )
 							C_Item.EquipItemByName( Stripper.targetSetItemArray[i], i )
 							Stripper.addLater = time()+Stripper.setWaitTime;
@@ -337,13 +337,15 @@ function Stripper.AddOne()
 						Stripper.Print("Slot "..i.." is nil?")
 					end
 				end
-				-- print(i, Stripper.slotListMap[i], equipped, (GetItemInfo(Stripper.targetSetItemArray[i])));
+				-- print(i, Stripper.slotListMap[i], equipped, (C_Item.GetItemInfo(Stripper.targetSetItemArray[i])));
 			end
 		end
+		C_EquipmentSet.UseEquipmentSet( Stripper.targetSetNum )
 		Stripper.Stop()
 	end
 end
 function Stripper.Stop()
+	Stripper.targetSetNum = nil
 	Stripper.targetSet = nil
 	Stripper.targetSetItemArray = nil
 	Stripper.Print("Ending targetSet")
@@ -401,6 +403,7 @@ function Stripper.Command( msg )
 		if setName then
 			Stripper.setWaitTime = tonumber(param) or 5
 			Stripper.targetSet = setName
+			Stripper.targetSetNum = setNum
 			Stripper.Print("Set targetSet to "..Stripper.targetSet)
 			if Stripper.setWaitTime == 0 then
 				C_EquipmentSet.UseEquipmentSet( setNum )
